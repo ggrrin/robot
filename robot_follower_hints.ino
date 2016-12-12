@@ -10,7 +10,7 @@
  *      5) při aktivaci mezisensorů přikládá prioritu senzoru,
  *          který odpovídá poslední zaznamenané nápovědě
  */
-#include "Arduino.h"
+#include <Arduino.h>
 #include <Servo.h>
 
 Servo leftWheel;
@@ -31,7 +31,6 @@ Servo rightWheel;
  */
 uint8_t button = 2;
 uint8_t led = 11;
-//int sensors[] = {A0, A1, A2, A3, A4};
 uint8_t sensors[] = {3, 4, 5, 6, 7};
 uint8_t leftWheelPin = 12;
 uint8_t rightWheelPin = 13;
@@ -44,7 +43,7 @@ long spiralLastCall = -1;
 int sensor_values[] = {0, 0, 0, 0, 0};
 boolean turnRight = 0;
 boolean rightHintEncountered = 0;
-boolean lefttHintEncountered = 0;
+boolean leftHintEncountered = 0;
 
 
 /**
@@ -162,7 +161,7 @@ void loop() {
 
         /* Přenastavení stavu podle nápovědy */
         if (first_left() && !second_left()) {
-            lefttHintEncountered = false;
+            leftHintEncountered = false;
             rightHintEncountered = true;
             hintEncounter = millis();
         } else if (!first_left() && !second_left()) {
@@ -171,20 +170,20 @@ void loop() {
             if (now - hintEncounter < HINT_DELAY && rightHintEncountered) {
                 turnRight = false;
             }
-            lefttHintEncountered = false;
+            leftHintEncountered = false;
             rightHintEncountered = false;
         }
         if (first_right() && !second_right()) {
-            lefttHintEncountered = true;
+            leftHintEncountered = true;
             rightHintEncountered = false;
             hintEncounter = millis();
         } else if (!first_left() && !second_left()) {
             /* Stav se změní pouze pokud značka nebyla pod senzorem moc dlouho */
             unsigned long now = millis();
-            if (now - hintEncounter < HINT_DELAY && lefttHintEncountered) {
+            if (now - hintEncounter < HINT_DELAY && leftHintEncountered) {
                 turnRight = true;
             }
-            lefttHintEncountered = false;
+            leftHintEncountered = false;
             rightHintEncountered = false;
         }
 
