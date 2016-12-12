@@ -24,14 +24,16 @@ Servo rightWheel;
 #define MIN_RIGHT_SPEED (1700)
 #define MAX_RIGHT_SPEED (1300)
 #define SPIRAL_DELAY    (1000)
-#define HINT_DELAY      (800)
+#define HINT_DELAY_MAX  (350)
+#define HINT_DELAY_MIN  (270)
 
 /**
  * Piny pro ovládání a čtení periferií.
  */
 uint8_t button = 2;
 uint8_t led = 11;
-uint8_t sensors[] = {3, 4, 5, 6, 7};
+//uint8_t sensors[] = {3, 4, 5, 6, 7};
+uint8_t sensors[] = {A0, A1, A2, A3, A4};
 uint8_t leftWheelPin = 12;
 uint8_t rightWheelPin = 13;
 
@@ -124,7 +126,7 @@ void slightly_left() ;
  */
 void setup() {
     /* Inicializace výstupu po sériové lince */
-    Serial.begin(9600);
+    Serial.begin(115200);
     Serial.println("Serial prepared");
 
 
@@ -160,30 +162,36 @@ void loop() {
         read_sensors();
 
         /* Přenastavení stavu podle nápovědy */
-        if (first_left() && !second_left()) {
-            leftHintEncountered = false;
-            rightHintEncountered = true;
-            hintEncounter = millis();
-        } else if (!first_left() && !second_left()) {
-            /* Stav se změní pouze pokud značka nebyla pod senzorem moc dlouho */
-            unsigned long now = millis();
-            if (now - hintEncounter < HINT_DELAY && rightHintEncountered) {
-                turnRight = false;
-            }
-            leftHintEncountered = false;
-            rightHintEncountered = false;
-        }
-        if (first_right() && !second_right()) {
+        if (first_left() && !second_left() && !leftHintEncountered) {
             leftHintEncountered = true;
             rightHintEncountered = false;
             hintEncounter = millis();
         } else if (!first_left() && !second_left()) {
             /* Stav se změní pouze pokud značka nebyla pod senzorem moc dlouho */
-            unsigned long now = millis();
-            if (now - hintEncounter < HINT_DELAY && leftHintEncountered) {
-                turnRight = true;
-            }
+//            unsigned long now = millis();
+//            unsigned long diff = now - hintEncounter;
+//            if (diff < HINT_DELAY_MAX && diff > HINT_DELAY_MIN && leftHintEncountered) {
+//                Serial.print("left: ");
+//                Serial.println(now - hintEncounter);
+            turnRight = false;
+//                Serial.println("Left state");
+//            }
             leftHintEncountered = false;
+        }
+        if (first_right() && !second_right() && !rightHintEncountered) {
+            leftHintEncountered = false;
+            rightHintEncountered = true;
+            hintEncounter = millis();
+        } else if (!first_right() && !second_right()) {
+            /* Stav se změní pouze pokud značka nebyla pod senzorem moc dlouho */
+//            unsigned long now = millis();
+//            unsigned long diff = now - hintEncounter;
+//            if (diff < HINT_DELAY_MAX && diff > HINT_DELAY_MIN && rightHintEncountered) {
+//                Serial.print("right: ");
+//                Serial.println(now - hintEncounter);
+            turnRight = true;
+//                Serial.println("Right state");
+//            }
             rightHintEncountered = false;
         }
 
@@ -191,22 +199,26 @@ void loop() {
         if (turnRight) {
             if (second_right()) {
                 slightly_right();
+//                in_place_right();
                 spiralLastCall = -1;
                 continue;
             }
-            if (second_left()) {
+            if (second_left() && !middle()) {
                 slightly_left();
+//                in_place_left();
                 spiralLastCall = -1;
                 continue;
             }
         } else {
             if (second_left()) {
                 slightly_left();
+//                in_place_left();
                 spiralLastCall = -1;
                 continue;
             }
-            if (second_right()){
+            if (second_right() && !middle()) {
                 slightly_right();
+//                in_place_right();
                 spiralLastCall = -1;
                 continue;
             }
@@ -242,8 +254,11 @@ void loop() {
  */
 void read_sensors() {
     for (int i = 0; i < NUM_SENSORS; i++) {
-        sensor_values[i] = digitalRead(sensors[i]);
+//        sensor_values[i] = digitalRead(sensors[i]);
+        Serial.print(analogRead(sensors[i]));
+        Serial.print(" ");
     }
+    Serial.println();
 }
 
 /**
@@ -333,10 +348,6 @@ void right_speed(double speed) {
  */
 boolean spiral() {
     unsigned long now = millis();
-//    if (spiralLastCall == -1 || now - spiralLastCall < SPIRAL_DELAY) {
-//        spiralLastCall = now;
-//        return false;
-//    }
     /* Funkce je volaná poprvé po jiné operaci */
     if (spiralLastCall == -1) {
         spiralLastCall = now;
@@ -365,8 +376,8 @@ void stop() {
  * Dopředná jízda plnou rychlostí.
  */
 void full_forward() {
-    left_speed(1);
-    right_speed(1);
+    left_speed(0.1);
+    right_speed(0.1);
 }
 
 /**
@@ -381,8 +392,8 @@ void in_place_left() {
  * Pomalejší zatáčení doleva obloukem.
  */
 void slightly_left() {
-    left_speed(0);
-    right_speed(0.5);
+    left_speed(-0.05);
+    right_speed(0.2);
 }
 
 /**
@@ -405,8 +416,8 @@ void in_place_right() {
  * Pomalejší zatáčení doprava obloukem.
  */
 void slightly_right() {
-    left_speed(0.5);
-    right_speed(0);
+    left_speed(0.2);
+    right_speed(-0.05);
 }
 
 /**
