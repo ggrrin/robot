@@ -14,9 +14,18 @@ void loop() {
 
 	while (1) {
 		if (cmd == nullptr)
-			pl->prepare_route(location(0, 0, direction::North), location(4, 4, direction::West));
+		{
+			if (!pl->prepare_route(location(0, 0, direction::North), location(4, 4, direction::West), true))
+			{
+				//TODO what to do
+				robot.led_on();
+				break;
+			}
+		}
 		else if (cmd->is_done())
+		{
 			cmd = pl->get_next_command();
+		}
 		else
 		{
 			robot.read_sensors();

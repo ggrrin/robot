@@ -17,7 +17,7 @@ public:
 class planner
 {
 public:
-	virtual void prepare_route(const location& source, const location& target) = 0;
+	virtual bool prepare_route(const location& source, const location& target, bool moveFirstX) = 0;
 	virtual command* get_next_command() = 0;
 };
 

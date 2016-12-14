@@ -5,6 +5,8 @@
 #include <Servo.h>
 #include <EEPROM.h>
 
+#include "location.h"
+
 
 #define MAGIC           ("GV-v001")
 #define BLACK           (0)
@@ -35,7 +37,19 @@ class boe_bot
 	int sensor_values[5] = { 0, 0, 0, 0, 0 };
 	int current_instruction = 0;
 
+	location location_state;
+
 public:
+	
+	const location& get_location() const
+	{
+		return location_state;
+	}
+
+	void set_location(const location& loc)
+	{
+		location_state = loc;
+	}
 
 	/**
 	* Uloží text do EEPROM od dané adresy o dané délce, případně délku doplní mezerami.
