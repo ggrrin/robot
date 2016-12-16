@@ -1,5 +1,5 @@
-﻿#ifndef boe_bot_state_
-#define boe_bot_state_
+﻿#ifndef boe_bot_h_
+#define boe_bot_h_
 
 #include <Arduino.h>
 #include <Servo.h>

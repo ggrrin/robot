@@ -1,5 +1,5 @@
-#ifndef location_
-#define location_
+#ifndef location_h_
+#define location_h_
 
 enum direction
 {

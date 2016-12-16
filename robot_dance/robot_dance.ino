@@ -1,4 +1,5 @@
-#include "boe_bot_controls.h"
+#include "location.h"
+#include "boe_bot_planner.h"
 
 boe_bot robot;
 
@@ -15,7 +16,7 @@ void loop() {
 	while (1) {
 		if (cmd == nullptr)
 		{
-			if (!pl->prepare_route(location(0, 0, direction::North), location(4, 4, direction::West), true))
+			if (!pl->prepare_route(location(0, 0, direction::North), location(4, 4, direction::West), true, 0))
 			{
 				//TODO what to do
 				robot.led_on();
