@@ -35,7 +35,7 @@ public:
      *
      * @param time_elapsed Absolute elapsed time from the start of the dance.
      */
-    virtual void update(const time_t &time_elapsed) override;
+    virtual void update(const time_ttt &time_elapsed) override;
 
     /**
      * Force this command to stop regardless of its state.
@@ -43,17 +43,23 @@ public:
      * @return //TODO ?
      */
     virtual bool force_stop() override;
+	char* get_name() override;
 };
 
 
 
 //class turn
 
+
 inline turn_command::turn_command(bool left_p, boe_bot *robot_p, location final_location_p) : boe_bot_command_base(
         robot_p, final_location_p), left(left_p), leavingFirstLine(true) {};
 
+
+//if planing is correct we dont have to take care of corners,
+//because planner should not add two (or three at corrners) turn commands
+//when robot is on the border, but only single one
 //NOTE: if planing is correct we don't have to take care of corners
-void turn_command::update(const time_t &time_elapsed) {
+void turn_command::update(const time_ttt &time_elapsed) {
     if (is_done()) {
         return;
     }
@@ -87,9 +93,18 @@ void turn_command::update(const time_t &time_elapsed) {
 };
 
 inline bool turn_command::force_stop() {
-    finish();
-    //TODO co vrací?
-    return true;
+	finish();
+	//TODO co vrací?
+	return true;
+}
+
+inline char* turn_command::get_name()
+{
+	if(left)
+		return "turn command [left]";
+	else
+		return "turn command [right]";
+
 };
 
 #endif

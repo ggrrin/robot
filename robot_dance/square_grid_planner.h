@@ -54,6 +54,8 @@ private:
      */
     int try_turn(const direction &from, const direction &to, bool clockwise, bool add_commands,
                  const position &rotation_position);
+	bool is_on_border(const position& pos) const;
+	bool is_outside_square(const position& pos) const;
 
 protected:
 
@@ -92,6 +94,7 @@ protected:
     virtual command *get_turn_cmd(bool left, const location &final_location) = 0;
 
 public:
+	virtual ~square_grid_planner();
 
     /**
      * Creates a planner, which is able to make routes on a grid map.
@@ -108,10 +111,9 @@ public:
      * @param target Desired target location.
      * @param moveFirstX Defines axis priority.
      * @param time_constrain_p Maximum absolute time for this command.
-     * @return //TODO: co vracet?
+     * @return returns false on failure otherwise true 
      */
-    virtual bool prepare_route(const location &source, const location &target, bool moveFirstX,
-                               const time_t &time_constrain_p) override;
+    virtual bool prepare_route(const location &source, const location &target, bool moveFirstX, const time_ttt &time_constrain_p) override;
 
     /**
      * Gets next command from the queue or nullptr if queue is empty.
@@ -124,7 +126,10 @@ public:
 
 
 //class square_grid_planner
-
+inline square_grid_planner::~square_grid_planner()
+{
+	clear_commands();
+};
 inline square_grid_planner::square_grid_planner(int width_p, int height_p) : width(width_p), height(height_p),
                                                                              commands(nullptr),
                                                                              command_length_estimate(0), length(0),
@@ -139,33 +144,58 @@ inline void square_grid_planner::clear_commands() {
         commands = nullptr;
     }
 
-    length = 0;
-    current_cmd_index = 0;
+
+	length = 0;
+	current_cmd_index = 0;
 }
 
-inline void square_grid_planner::add_command(command *command) {
-    if (length == command_length_estimate) {
-        Serial.println("Error in planner - command buffer exceeded");
-        return;
-    }
+inline void square_grid_planner::add_command(command* command)
+{
+	if (length == command_length_estimate)
+	{
+#ifdef ARDUINO
+		Serial.println("Error in planner - command buffer exceeded");
+#endif
+		return;
+	}
 
     commands[length++] = command;
 }
 
-int square_grid_planner::try_turn(const direction &from, const direction &to, bool clockwise, bool add_commands,
-                                  const position &position) {
-    int steps = 0;
-    direction direction_i = from;
-    while (direction_i != to) {
-        steps++;
-        direction_i++;
-        direction_i %= 4;
+inline int square_grid_planner::try_turn(const direction & from, const direction & to, bool clockwise, bool add_commands, const position& rotation_position)
+{
+	int steps = 0;
+	int direction_i = from;
+	while (direction_i != to)
+	{
+		steps++;
+		if (clockwise)
+			direction_i++;
+		else
+			direction_i--;
 
-        if (add_commands)
-            add_command(get_turn_cmd(!clockwise, location(position, direction_i)));
-    }
+		direction_i += 4;
+		direction_i %= 4;
+
+		auto new_direction = static_cast<direction>(direction_i);
+		//if we are turning sensor point (pos + direction) to square (borders inclusive) it is always correct
+		//if we assume model from assignment !!!!! (turning with sensor point from outside p1 to outside p2 doesn't make sense
+		if (add_commands && !is_outside_square(rotation_position + position(new_direction)))
+			add_command(get_turn_cmd(!clockwise, location(rotation_position, new_direction)));
+	}
 
     return steps;
+}
+
+inline bool square_grid_planner::is_on_border(const position& pos) const
+{
+	return ((pos.get_x() == 0 || pos.get_x() == width - 1) && pos.get_y() >= 0 && pos.get_y() < height) || //left and right boundaries
+		((pos.get_y() == 0 || pos.get_y() == height - 1) && pos.get_x() >= 0 && pos.get_x() < width); //bottom and top boundaries
+}
+
+inline bool square_grid_planner::is_outside_square(const position& pos) const
+{
+	return pos.get_x() < 0 || pos.get_x() >= width || pos.get_y() < 0 || pos.get_y() >= height;
 }
 
 void square_grid_planner::add_rotation_commands(const position &rotation_position, const direction &from,
@@ -174,15 +204,18 @@ void square_grid_planner::add_rotation_commands(const position &rotation_positio
         return;
     }
 
+
     int steps_cw = try_turn(from, to, true, false, rotation_position);
     int steps_ccw = try_turn(from, to, false, false, rotation_position);
 
-    try_turn(from, to, steps_cw < steps_ccw, true, rotation_position);
+	try_turn(from, to, steps_cw < steps_ccw, true, rotation_position);
 };
 
-position square_grid_planner::add_go_straight_commands(const location &start_location, int count) {
-    position current_position = start_location.get_position();
-    position move = position(start_location.get_direction());
+
+inline position square_grid_planner::add_go_straight_commands(const location& start_location, int count)
+{
+	position current_position = start_location.get_position();
+	position move = position(start_location.get_direction());
 
     for (size_t i = 0; i < count; i++) {
         current_position += move;
@@ -192,67 +225,61 @@ position square_grid_planner::add_go_straight_commands(const location &start_loc
     return current_position;
 };
 
-bool square_grid_planner::prepare_route(const location &source, const location &target, bool moveFirstX,
-                                        const time_t &time_constrain_p) {
-    clear_commands();
 
-    if (source.get_direction() == direction::NotSpecified
-        || source.get_position().get_x() < 0
-        || source.get_position().get_x() >= width
-        || source.get_position().get_y() < 0
-        || source.get_position().get_y() >= height
-        || target.get_position().get_x() < 0
-        || target.get_position().get_x() >= width
-        || target.get_position().get_y() < 0
-        || target.get_position().get_y() >= height) {
+inline bool square_grid_planner::prepare_route(const location& source, const location& target, bool moveFirstX, const time_ttt& time_constrain_p)
+{
+	clear_commands();
 
-        Serial.println("Some of the arguments passed to prepare_route are invalid");
-        return false;
-    }
+	if (source.get_direction() == direction::NotSpecified || is_outside_square(source.get_position()) || is_outside_square(target.get_position()))
+	{
+#ifdef ARDUINO
+		Serial.println("Some of the arguments passed to preapre_route are invalid");
+#endif
+		return false;
+	}
 
-    position move = target.get_position() - source.get_position();
-    command_length_estimate =
-            2 + move.get_manhattan_length() + 1 + 2; // rotation + moves + rotation between moves + final rotation
-    commands = new command *[command_length_estimate];
+	position move = target.get_position() - source.get_position();
+	command_length_estimate = 2 + move.get_manhattan_length() + 1 + 2; // rotation + moves + rotation between moves + final rotation
+	commands = new command*[command_length_estimate];
 
-    direction first_move_direction = moveFirstX ? move.get_x_direction() : move.get_y_direction();
-    direction second_move_direction = !moveFirstX ? move.get_x_direction() : move.get_y_direction();
+	direction first_move_direction = moveFirstX ? move.get_x_direction() : move.get_y_direction();
+	direction second_move_direction = !moveFirstX ? move.get_x_direction() : move.get_y_direction();
 
-    direction last_direction = source.get_direction();
-    position last_position = source.get_position();
-    if (first_move_direction != direction::NotSpecified) {
-        last_direction = first_move_direction;
+	direction last_direction = source.get_direction();
+	position last_position = source.get_position();
+	if (first_move_direction != direction::NotSpecified)
+	{
+		add_rotation_commands(last_position, last_direction, first_move_direction);
+		last_direction = first_move_direction;
 
-        add_rotation_commands(last_position, last_direction, first_move_direction);
-        last_position = add_go_straight_commands(location(last_position, last_direction),
-                                                 moveFirstX ? move.get_x_abs() : move.get_y_abs());
-    }
+		last_position = add_go_straight_commands(location(last_position, last_direction), moveFirstX ? move.get_x_abs() : move.get_y_abs());
+	}
 
-    if (second_move_direction != direction::NotSpecified) {
-        last_direction = second_move_direction;
+	if (second_move_direction != direction::NotSpecified)
+	{
+		add_rotation_commands(last_position, last_direction, second_move_direction);
+		last_direction = second_move_direction;
 
-        add_rotation_commands(last_position, last_direction, second_move_direction);
-        last_position = add_go_straight_commands(location(last_position, last_direction),
-                                                 !moveFirstX ? move.get_x_abs() : move.get_y_abs());
-    }
+		last_position = add_go_straight_commands(location(last_position, last_direction), !moveFirstX ? move.get_x_abs() : move.get_y_abs());
+	}
 
-    /* Rotation on the final position */
-    if (target.get_direction() != direction::NotSpecified) {
-        add_rotation_commands(last_position, last_direction, target.get_direction());
-    }
+	if (target.get_direction() != direction::NotSpecified)
+	{
+		add_rotation_commands(last_position, last_direction, target.get_direction());
+	}
 
-    if (length > 0)
-        commands[length - 1]->set_time_constrain(time_constrain_p);
+	if (length > 0)
+		commands[length - 1]->set_time_constrain(time_constrain_p);
 
-    //TODO: co se má vracet?
-    return true;
+	return true;
 };
 
-inline command *square_grid_planner::get_next_command() {
-    if (current_cmd_index == command_length_estimate)
-        return nullptr;
-    else
-        return commands[current_cmd_index++];
+inline command* square_grid_planner::get_next_command()
+{
+	if (current_cmd_index == length)
+		return nullptr;
+	else
+		return commands[current_cmd_index++];
 };
 
 #endif

@@ -1,9 +1,8 @@
 #ifndef location_h_
 #define location_h_
 
-#include <Arduino.h>
-
 #include "position.hpp"
+
 
 
 /**
@@ -74,5 +73,6 @@ location::location() : location(0, 0, direction::NotSpecified) {};
 location::location(position position_p, direction direction_p) : position_(position_p), direction_(direction_p) {};
 
 location::location(int px, int py, direction direction_p) : position_(position(px, py)), direction_(direction_p) {};
+
 
 #endif

@@ -35,6 +35,7 @@ public:
      * @param y_p Position on vertical axis.
      */
     position(int x_p, int y_p);
+    position();
 
     /**
      * Creates a position as a unit vector from (0;0) based on given direction.
@@ -148,7 +149,11 @@ public:
 
 //class position
 
-position::position(int x_p, int y_p) : x(x_p), y(y_p) {};
+position::position(int x_p, int y_p) : x(x_p), y(y_p) {}
+
+inline position::position() : position(0,0)
+{
+};
 
 position::position(direction direction_p) :
         x(direction_p == direction::West ? -1 : (direction_p == East ? 1 : 0)),
