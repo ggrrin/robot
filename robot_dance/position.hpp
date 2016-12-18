@@ -2,6 +2,9 @@
 #ifndef POSITION_HPP
 #define POSITION_HPP
 
+#include <Arduino.h>
+
+
 /**
  * Provides four basic directions, to which robot can be commanded.
  */
@@ -151,9 +154,7 @@ public:
 
 position::position(int x_p, int y_p) : x(x_p), y(y_p) {}
 
-inline position::position() : position(0,0)
-{
-};
+inline position::position() : position(0,0) {};
 
 position::position(direction direction_p) :
         x(direction_p == direction::West ? -1 : (direction_p == East ? 1 : 0)),

@@ -43,7 +43,9 @@ public:
      * @return //TODO ?
      */
     virtual bool force_stop() override;
+
 	char* get_name() override;
+
 };
 
 
@@ -101,9 +103,9 @@ inline bool turn_command::force_stop() {
 inline char* turn_command::get_name()
 {
 	if(left)
-		return "turn command [left]";
+		return (char *) "turn command [left]";
 	else
-		return "turn command [right]";
+		return (char *) "turn command [right]";
 
 };
 

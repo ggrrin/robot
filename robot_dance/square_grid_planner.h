@@ -165,7 +165,7 @@ inline void square_grid_planner::add_command(command* command)
 }
 
 int square_grid_planner::try_turn(const direction &from, const direction &to, bool clockwise, bool add_commands,
-                                  const position &position) {
+                                  const position &rotation_position) {
     int steps = 0;
     direction direction_i = from;
     while (direction_i != to) {
@@ -186,11 +186,10 @@ int square_grid_planner::try_turn(const direction &from, const direction &to, bo
             case NotSpecified:break;
         }
 
-		auto new_direction = static_cast<direction>(direction_i);
 		//if we are turning sensor point (pos + direction) to square (borders inclusive) it is always correct
 		//if we assume model from assignment !!!!! (turning with sensor point from outside p1 to outside p2 doesn't make sense
-		if (add_commands && !is_outside_square(rotation_position + position(new_direction)))
-			add_command(get_turn_cmd(!clockwise, location(rotation_position, new_direction)));
+		if (add_commands && !is_outside_square(rotation_position + position(direction_i)))
+			add_command(get_turn_cmd(!clockwise, location(rotation_position, direction_i)));
 	}
 
     return steps;
@@ -239,10 +238,10 @@ inline bool square_grid_planner::prepare_route(const location& source, const loc
 {
 	clear_commands();
 
-	if (source.get_direction() == direction::NotSpecified || is_outside_square(source.get_position()) || is_outside_square(target.get_position()))
-	{
+	if (source.get_direction() == direction::NotSpecified
+		|| is_outside_square(source.get_position()) || is_outside_square(target.get_position())) {
 #ifdef ARDUINO
-		Serial.println("Some of the arguments passed to preapre_route are invalid");
+		Serial.println("Some of the arguments passed to prepare_route are invalid");
 #endif
 		return false;
 	}

@@ -64,7 +64,9 @@ public:
      * @return //TODO ?
      */
     virtual bool force_stop() override;
+
 	char* get_name() override;
+
 };
 
 
@@ -153,7 +155,7 @@ inline bool move_command::force_stop() {
 
 inline char* move_command::get_name()
 {
-	return "move command";
+	return (char *) "move command";
 
 };
 

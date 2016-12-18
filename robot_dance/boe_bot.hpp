@@ -7,10 +7,13 @@
 #include "location.h"
 #include "sensors.hpp"
 #include "wheel_control.hpp"
-#include "instruction_manager.hpp"
+#include "command_parser_eeprom.hpp"
 #include "push_button.hpp"
 
 
+/**
+ * Container for the Boe bot robot.
+ */
 class boe_bot {
 
     const uint8_t led = 11;
@@ -19,8 +22,7 @@ class boe_bot {
 
     wheel_control wheels;
     sensors ir_sensors;
-    permanent_storage storage;
-    instruction_manager instr_manager;
+    command_parser cmd_parser;
     push_button button;
 
 public:
@@ -35,12 +37,12 @@ public:
     }
 
     /**
-     * Gets instruction manager with access to whole instruction queue.
+     * Gets command parser with access to whole instruction queue.
      *
-     * @return The instruction manager with access to whole instruction queue.
+     * @return The command parser with access to whole instruction queue.
      */
-    instruction_manager get_instruction_manager() const {
-        return instr_manager;
+    command_parser *get_command_parser() const {
+        return &cmd_parser;
     }
 
     /**
@@ -184,8 +186,9 @@ public:
 
         /* Short button press, load previous dance */
         if (!longPress) {
-            if (!instr_manager.magic_matches()) {
+            if (!cmd_parser.fetch_initial()) {
                 Serial.println("Magic does not match!");
+                cmd_parser.reset_commands();
             }
             return;
         }
@@ -193,10 +196,14 @@ public:
         /* Long button press, read & save new dance until the button is pressed again (second push) */
         do {
             if (Serial.available() > 0) {
-                const uint8_t value = (const uint8_t &) Serial.read();
-                instr_manager.store_byte(value);
+                const char value = (const char) Serial.read();
+                if (!cmd_parser.store_character(value)) {
+                    Serial.println("Incorrect input!");
+                    cmd_parser.reset_commands();
+                }
             }
         } while (!button.is_pushed());
+        set_location(cmd_parser.get_initial_location());
 
         /* Third button push will start the new dance */
         button.wait_for_button_release();

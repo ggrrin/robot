@@ -93,7 +93,7 @@ public:
 	virtual location get_initial_location() override;
 	virtual position get_current_target() override;
 	virtual bool is_first_directionX() override;
-	virtual time_type get_finish_time_constraion() override;
+	virtual time_type get_finish_time_constrain() override;
 };
 
 inline command_parser_mocap::command_parser_mocap(): current_instruction(-1)
@@ -121,7 +121,7 @@ inline bool command_parser_mocap::is_first_directionX()
 	return firstX[current_instruction];
 }
 
-inline time_type command_parser_mocap::get_finish_time_constraion()
+inline time_type command_parser_mocap::get_finish_time_constrain()
 {
 	return times[current_instruction];
 }

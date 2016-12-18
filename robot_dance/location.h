@@ -4,7 +4,6 @@
 #include <Arduino.h>
 
 #include "position.hpp"
-#include "instruction.hpp"
 
 
 /**
@@ -47,11 +46,16 @@ public:
     location(position position_p, direction direction_p);
 
     /**
-     * Creates a location from known instruction.
+     * Sets the location at given position towards given direction.
      *
-     * @param instruction_p Instruction of the dance move.
+     * @param px Position on horizontal axis.
+     * @param py Position on vertical axis.
+     * @param direction_p Direction on this location.
      */
-    location(instruction instruction_p);
+    void set_location(int px, int py, direction direction_p) {
+        position_ = position(px, py);
+        direction_ = direction_p;
+    }
 
     /**
      * Gets current position.
@@ -82,7 +86,5 @@ location::location() : location(0, 0, direction::NotSpecified) {};
 location::location(position position_p, direction direction_p) : position_(position_p), direction_(direction_p) {};
 
 location::location(int px, int py, direction direction_p) : position_(position(px, py)), direction_(direction_p) {};
-
-location::location(instruction instruction_p) : location(instruction_p.desiredPosition, direction::NotSpecified) {};
 
 #endif
