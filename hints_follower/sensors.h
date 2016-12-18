@@ -1,6 +1,6 @@
 
-#ifndef ROBOT_FOLLOWER_HINTS_SENSORS_H
-#define ROBOT_FOLLOWER_HINTS_SENSORS_H
+#ifndef SENSORS_H
+#define SENSORS_H
 
 #include <Arduino.h>
 
@@ -8,9 +8,15 @@
 #define WHITE           (1)
 #define NUM_SENSORS     (5)
 
-
-int sensor_values[] = {0, 0, 0, 0, 0};
+/**
+ * Pins attached to sensors.
+ */
 const uint8_t sensors[] = {3, 4, 5, 6, 7};
+
+/**
+ * Last measured sensor values.
+ */
+int sensor_values[] = {0, 0, 0, 0, 0};
 
 
 /**
@@ -77,4 +83,4 @@ boolean first_right() {
     return sensor_values[4] == BLACK;
 }
 
-#endif //ROBOT_FOLLOWER_HINTS_SENSORS_H
+#endif //SENSORS_H

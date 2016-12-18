@@ -1,6 +1,6 @@
 
-#ifndef ROBOT_FOLLOWER_HINTS_HITS_FOLLOWER_HPP
-#define ROBOT_FOLLOWER_HINTS_HITS_FOLLOWER_HPP
+#ifndef HINTS_FOLLOWER_H
+#define HINTS_FOLLOWER_H
 
 #include <Arduino.h>
 
@@ -29,4 +29,4 @@ void led_off() ;
 boolean spiral() ;
 
 
-#endif //ROBOT_FOLLOWER_HINTS_HITS_FOLLOWER_HPP
+#endif //HINTS_FOLLOWER_H

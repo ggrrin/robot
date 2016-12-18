@@ -18,7 +18,7 @@
  */
 
 #include <Arduino.h>
-#include <Servo.h>
+
 #include "hints_follower.h"
 #include "wheel_control.h"
 #include "sensors.h"

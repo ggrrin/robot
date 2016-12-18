@@ -3,36 +3,32 @@
 
 boe_bot robot;
 
+
 void setup() {
-	robot.setup();
+    robot.setup();
 }
 
 void loop() {
-	robot.start();
+    robot.start();
 
-	planner* pl = new boe_bot_planner(&robot, 5, 5);
-	command* cmd = nullptr;
+    planner *pl = new boe_bot_planner(&robot, 5, 5);
+    command *cmd = nullptr;
 
-	while (1) {
-		if (cmd == nullptr)
-		{
-			if (!pl->prepare_route(location(0, 0, direction::North), location(4, 4, direction::West), true, 0))
-			{
-				//TODO what to do
-				robot.led_on();
-				break;
-			}
-		}
-		else if (cmd->is_done())
-		{
-			cmd = pl->get_next_command();
-		}
-		else
-		{
-			robot.read_sensors();
-			cmd->update(millis());
-		}
-	}
+    while (1) {
+        if (cmd == nullptr) {
+            //TODO: návrat na prvotní pozici + orientaci
+            if (!pl->prepare_route(location(0, 0, direction::North), location(4, 4, direction::West), true, 0)) {
+                //TODO what to do
+                robot.led_on();
+                break;
+            }
+        } else if (cmd->is_done()) {
+            cmd = pl->get_next_command();
+        } else {
+            robot.get_sensors().read_sensors();
+            cmd->update(millis());
+        }
+    }
 
-	delete pl;
+    delete pl;
 }

@@ -1,6 +1,6 @@
 
-#ifndef ROBOT_FOLLOWER_HINTS_BUTTON_H
-#define ROBOT_FOLLOWER_HINTS_BUTTON_H
+#ifndef BUTTON_H
+#define BUTTON_H
 
 #include <Arduino.h>
 
@@ -17,7 +17,6 @@ void init_button(const uint8_t button) {
     pinMode(button, INPUT);
     /* Tlačítko se zapnutým pull-up -> stisk vyvolá hodnotu LOW */
     digitalWrite(button, HIGH);
-
 }
 
 /**
@@ -53,4 +52,4 @@ boolean check_long_press_button(const uint8_t button) {
     return (millis() - pressStart) > LONG_PRESS_TIME;
 }
 
-#endif //ROBOT_FOLLOWER_HINTS_BUTTON_H
+#endif //BUTTON_H

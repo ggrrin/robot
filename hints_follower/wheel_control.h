@@ -1,8 +1,9 @@
 
-#ifndef ROBOT_FOLLOWER_HINTS_SERVO_CONTROL_H
-#define ROBOT_FOLLOWER_HINTS_SERVO_CONTROL_H
+#ifndef WHEEL_CONTROL_H
+#define WHEEL_CONTROL_H
 
 #include <Arduino.h>
+#include <Servo.h>
 
 #define MIN_LEFT_SPEED  (1300)
 #define MAX_LEFT_SPEED  (1700)
@@ -119,4 +120,4 @@ void sharply_right() {
     right_speed(0);
 }
 
-#endif //ROBOT_FOLLOWER_HINTS_SERVO_CONTROL_H
+#endif //WHEEL_CONTROL_H
