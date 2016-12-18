@@ -18,7 +18,7 @@ class command_parser_mocap : public command_parser
 		false,
 	};
 
-	time_ttt times[10]{
+	time_type times[10]{
 		0,
 	};
 
@@ -35,7 +35,7 @@ class command_parser_mocap : public command_parser
 		false,
 	};
 
-	time_ttt times[10]{
+	time_type times[10]{
 		0,
 	};
 
@@ -51,7 +51,7 @@ class command_parser_mocap : public command_parser
 		true,
 	};
 
-	time_ttt times[10]{
+	time_type times[10]{
 		0,
 	};
 
@@ -74,7 +74,7 @@ class command_parser_mocap : public command_parser
 		false
 	};
 
-	time_ttt times[10]{
+	time_type times[10]{
 		0,
 		0,
 		0,
@@ -93,7 +93,7 @@ public:
 	virtual location get_initial_location() override;
 	virtual position get_current_target() override;
 	virtual bool is_first_directionX() override;
-	virtual time_ttt get_finish_time_constraion() override;
+	virtual time_type get_finish_time_constraion() override;
 };
 
 inline command_parser_mocap::command_parser_mocap(): current_instruction(-1)
@@ -121,7 +121,7 @@ inline bool command_parser_mocap::is_first_directionX()
 	return firstX[current_instruction];
 }
 
-inline time_ttt command_parser_mocap::get_finish_time_constraion()
+inline time_type command_parser_mocap::get_finish_time_constraion()
 {
 	return times[current_instruction];
 }

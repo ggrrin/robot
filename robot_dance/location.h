@@ -1,8 +1,10 @@
 #ifndef location_h_
 #define location_h_
 
-#include "position.hpp"
+#include <Arduino.h>
 
+#include "position.hpp"
+#include "instruction.hpp"
 
 
 /**
@@ -45,6 +47,13 @@ public:
     location(position position_p, direction direction_p);
 
     /**
+     * Creates a location from known instruction.
+     *
+     * @param instruction_p Instruction of the dance move.
+     */
+    location(instruction instruction_p);
+
+    /**
      * Gets current position.
      *
      * @return The current position.
@@ -74,5 +83,6 @@ location::location(position position_p, direction direction_p) : position_(posit
 
 location::location(int px, int py, direction direction_p) : position_(position(px, py)), direction_(direction_p) {};
 
+location::location(instruction instruction_p) : location(instruction_p.desiredPosition, direction::NotSpecified) {};
 
 #endif

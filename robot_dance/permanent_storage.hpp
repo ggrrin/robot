@@ -5,8 +5,6 @@
 #include <Arduino.h>
 #include <EEPROM.h>
 
-#define MAGIC   ("GV-v" VERSION)
-
 
 /**
  * Class providing access to read and write from/to permanent EEPROM storage.
@@ -23,7 +21,7 @@ public:
      * @param length Total number of bytes to be used.
      * @param text String to be stored within the EEPROM.
      */
-    void text_to_EEPROM(int address, int length, String text);
+    void text_to_EEPROM(int address, int length, String text) const;
 
     /**
      * Reads text of a given length from the EEPROM.
@@ -32,7 +30,7 @@ public:
      * @param length Length of the text stored in EEPROM.
      * @return Read text without the trailing spaces.
      */
-    String text_from_EEPROM(int address, int length);
+    String text_from_EEPROM(int address, int length) const;
 
     /**
      * Writes an integer value to EEPROM.
@@ -40,7 +38,7 @@ public:
      * @param address Address in EEPROM of the first byte.
      * @param value Integer value to be stored.
      */
-    void int_to_EEPROM(int address, int value);
+    void int_to_EEPROM(int address, int value) const;
 
     /**
      * Reads an integer value from EEPROM.
@@ -48,7 +46,7 @@ public:
      * @param address Address of the first byte in EEPROM.
      * @return Read integer value from the EEPROM.
      */
-    int int_from_EEPROM(int address);
+    int int_from_EEPROM(int address) const;
 
 };
 
@@ -56,7 +54,7 @@ public:
 
 //class permanent_storage
 
-void permanent_storage::text_to_EEPROM(int address, int length, String text) {
+void permanent_storage::text_to_EEPROM(int address, int length, String text) const {
     for (int i = 0; i < text.length(); i++) {
         EEPROM.write(address + i, (byte) text[i]);
     }
@@ -65,7 +63,7 @@ void permanent_storage::text_to_EEPROM(int address, int length, String text) {
     }
 }
 
-String permanent_storage::text_from_EEPROM(int address, int length) {
+String permanent_storage::text_from_EEPROM(int address, int length) const {
     String text = "";
     for (int i = 0; i < length; i++) {
         char character = (char) EEPROM.read(address + i);
@@ -77,14 +75,14 @@ String permanent_storage::text_from_EEPROM(int address, int length) {
     return text;
 }
 
-void permanent_storage::int_to_EEPROM(int address, int value) {
+void permanent_storage::int_to_EEPROM(int address, int value) const {
     byte byte1 = (byte) value & 0xFF;
     byte byte2 = (byte) ((value >> 8) & 0xFF);
     EEPROM.write(address, byte1);
     EEPROM.write(address + 1, byte2);
 }
 
-int permanent_storage::int_from_EEPROM(int address) {
+int permanent_storage::int_from_EEPROM(int address) const {
     return EEPROM.read(address) + ((EEPROM.read(address + 1)) << 8);
 }
 

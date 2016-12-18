@@ -20,7 +20,7 @@ protected:
     /**
      * Absolute time (from the beginning of the dance), before which this command must be performed.
      */
-    time_ttt time_constrain;
+    time_type time_constrain;
 
     /**
      * Robot performing the command tasks.
@@ -50,7 +50,7 @@ public:
 
     virtual bool is_done() override;
 
-    virtual void set_time_constrain(const time_ttt &time_constrain) override;
+    virtual void set_time_constrain(const time_type &time_constrain) override;
 
 };
 
@@ -73,7 +73,7 @@ inline bool boe_bot_command_base::is_done() {
     return state == FINISHED;
 }
 
-inline void boe_bot_command_base::set_time_constrain(const time_ttt &time_constrain) {
+inline void boe_bot_command_base::set_time_constrain(const time_type &time_constrain) {
     this->time_constrain = time_constrain;
 };
 

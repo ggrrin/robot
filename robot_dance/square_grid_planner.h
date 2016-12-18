@@ -111,9 +111,10 @@ public:
      * @param target Desired target location.
      * @param moveFirstX Defines axis priority.
      * @param time_constrain_p Maximum absolute time for this command.
-     * @return returns false on failure otherwise true 
+     * @return returns false on failure otherwise true
      */
-    virtual bool prepare_route(const location &source, const location &target, bool moveFirstX, const time_ttt &time_constrain_p) override;
+    virtual bool prepare_route(const location &source, const location &target, bool moveFirstX,
+                               const time_type &time_constrain_p) override;
 
     /**
      * Gets next command from the queue or nullptr if queue is empty.
@@ -126,10 +127,11 @@ public:
 
 
 //class square_grid_planner
-inline square_grid_planner::~square_grid_planner()
-{
+
+inline square_grid_planner::~square_grid_planner() {
 	clear_commands();
 };
+
 inline square_grid_planner::square_grid_planner(int width_p, int height_p) : width(width_p), height(height_p),
                                                                              commands(nullptr),
                                                                              command_length_estimate(0), length(0),
@@ -162,20 +164,27 @@ inline void square_grid_planner::add_command(command* command)
     commands[length++] = command;
 }
 
-inline int square_grid_planner::try_turn(const direction & from, const direction & to, bool clockwise, bool add_commands, const position& rotation_position)
-{
-	int steps = 0;
-	int direction_i = from;
-	while (direction_i != to)
-	{
-		steps++;
-		if (clockwise)
-			direction_i++;
-		else
-			direction_i--;
-
-		direction_i += 4;
-		direction_i %= 4;
+int square_grid_planner::try_turn(const direction &from, const direction &to, bool clockwise, bool add_commands,
+                                  const position &position) {
+    int steps = 0;
+    direction direction_i = from;
+    while (direction_i != to) {
+        steps++;
+        switch (direction_i) {
+            case direction::North:
+                direction_i = clockwise ? direction::East : direction::West;
+                break;
+            case direction::East:
+                direction_i = clockwise ? direction::South : direction::North;
+                break;
+            case direction::South:
+                direction_i = clockwise ? direction::West : direction::East;
+                break;
+            case direction::West:
+                direction_i = clockwise ? direction::North : direction::South;
+                break;
+            case NotSpecified:break;
+        }
 
 		auto new_direction = static_cast<direction>(direction_i);
 		//if we are turning sensor point (pos + direction) to square (borders inclusive) it is always correct
@@ -226,7 +235,7 @@ inline position square_grid_planner::add_go_straight_commands(const location& st
 };
 
 
-inline bool square_grid_planner::prepare_route(const location& source, const location& target, bool moveFirstX, const time_ttt& time_constrain_p)
+inline bool square_grid_planner::prepare_route(const location& source, const location& target, bool moveFirstX, const time_type& time_constrain_p)
 {
 	clear_commands();
 

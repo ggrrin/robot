@@ -2,8 +2,7 @@
 #define planning_h_
 
 #include "location.h"
-
-typedef unsigned long time_ttt;
+#include "robot_dance.hpp"
 
 
 /**
@@ -36,15 +35,14 @@ public:
 
     virtual ~command() {}
 
-    virtual void update(const time_ttt &time_elapsed) = 0;
+    virtual void update(const time_type &time_elapsed) = 0;
 
     virtual bool is_done() = 0;
 
     virtual bool force_stop() = 0;
 
-    virtual void set_time_constrain(const time_ttt &time_constrain) = 0;
+    virtual void set_time_constrain(const time_type &time_constrain) = 0;
 
-	virtual char* get_name() = 0;
 };
 
 
@@ -56,7 +54,8 @@ public:
 
     virtual ~planner() {}
 
-    virtual bool prepare_route(const location &source, const location &target, bool moveFirstX, const time_ttt &time_constrain_p) = 0;
+    virtual bool prepare_route(const location &source, const location &target, bool moveFirstX,
+                               const time_type &time_constrain_p) = 0;
 
     virtual command *get_next_command() = 0;
 
@@ -71,7 +70,7 @@ public:
 	virtual location get_initial_location() = 0;
 	virtual position get_current_target() = 0;
 	virtual bool is_first_directionX() = 0;
-	virtual time_ttt get_finish_time_constraion() = 0;
+	virtual time_type get_finish_time_constraion() = 0;
 };
 
 #endif

@@ -67,7 +67,7 @@ public:
 	{
 	}
 
-	void update(const time_ttt& time_elapsed) override
+	void update(const time_type& time_elapsed) override
 	{
 		//auto dir = ctx->get_location().get_direction() + (left ? -1 : +1);
 		//dir %= 4;
@@ -88,7 +88,7 @@ public:
 		return false;
 	}
 
-	void set_time_constrain(const time_ttt& time_constrain) override
+	void set_time_constrain(const time_type& time_constrain) override
 	{
 
 	}
@@ -114,7 +114,7 @@ public:
 	{ }
 
 
-	void update(const time_ttt& time_elapsed) override
+	void update(const time_type& time_elapsed) override
 	{
 		//auto pos = ctx->get_location().get_position();
 		//auto dir = ctx->get_location().get_direction();
@@ -157,7 +157,7 @@ public:
 		return false;
 	}
 
-	void set_time_constrain(const time_ttt& time_constrain) override
+	void set_time_constrain(const time_type& time_constrain) override
 	{
 
 	}

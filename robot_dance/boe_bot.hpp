@@ -1,4 +1,5 @@
-﻿#ifndef boe_bot_h_
+﻿
+#ifndef boe_bot_h_
 #define boe_bot_h_
 
 #include <Arduino.h>
@@ -6,25 +7,41 @@
 #include "location.h"
 #include "sensors.hpp"
 #include "wheel_control.hpp"
-#include "permanent_storage.hpp"
-
-#define VERSION "001"
+#include "instruction_manager.hpp"
+#include "push_button.hpp"
 
 
 class boe_bot {
 
     const uint8_t led = 11;
-    const uint8_t button = 2;
-
-    int current_instruction = 0;
 
     location location_state;
 
     wheel_control wheels;
     sensors ir_sensors;
     permanent_storage storage;
+    instruction_manager instr_manager;
+    push_button button;
 
 public:
+
+    /**
+     * Gets the button object.
+     *
+     * @return The button object.
+     */
+    const push_button &get_button() const {
+        return button;
+    }
+
+    /**
+     * Gets instruction manager with access to whole instruction queue.
+     *
+     * @return The instruction manager with access to whole instruction queue.
+     */
+    instruction_manager get_instruction_manager() const {
+        return instr_manager;
+    }
 
     /**
      * Gets sensors states containing last measurements.
@@ -148,47 +165,42 @@ public:
     }
 
     void setup() {
-        /* Inicializace výstupu po sériové lince */
-        Serial.begin(9600);
+        /* Serial line speed initialization */
+        Serial.begin(115200);
         Serial.println("Serial prepared");
 
-
-        /* Nastavení vstupů */
-        pinMode(button, INPUT);
-        /* Tlačítko se zapnutým pull-up -> stisk vyvolá hodnotu LOW */
-        digitalWrite(button, HIGH);
+        /* Input button & sensors initialization */
+        button.init_button();
         ir_sensors.init_sensors();
 
-
-        /* Nastavení výstupů */
+        /* Output LED and wheel servos initialization */
         pinMode(led, OUTPUT);
         wheels.init_servos();
     }
 
     void start() {
-        /* Aktivní čekání na první stisknutí tlačítka + umožnění nahrání tance */
-        int in;
-        boolean writingStarted = false;
-        int address = 0;
-        do {
-            /* Jsou dostupná data na vstupu? */
-            if (Serial.available() > 0) {
-                int incomingByte = Serial.read();
+        /* The length of first button push decides what do do next */
+        bool longPress = button.check_long_press_button();
 
-                /* Zápis unikátní konstanty pro snadnou kontrolu konzistence */
-                if (!writingStarted) {
-                    storage.text_to_EEPROM(address, sizeof(MAGIC), MAGIC);
-                    address += sizeof(MAGIC);
-                    writingStarted = true;
-                }
-
-                /* Uložení (části) příkazu */
-                EEPROM.write(address++, incomingByte);
+        /* Short button press, load previous dance */
+        if (!longPress) {
+            if (!instr_manager.magic_matches()) {
+                Serial.println("Magic does not match!");
             }
+            return;
+        }
 
-            /* Kontrola tlačítka */
-            in = digitalRead(button);
-        } while (in != 0);
+        /* Long button press, read & save new dance until the button is pressed again (second push) */
+        do {
+            if (Serial.available() > 0) {
+                const uint8_t value = (const uint8_t &) Serial.read();
+                instr_manager.store_byte(value);
+            }
+        } while (!button.is_pushed());
+
+        /* Third button push will start the new dance */
+        button.wait_for_button_release();
+        button.wait_for_button_push();
     }
 
 };

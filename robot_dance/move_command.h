@@ -17,21 +17,21 @@ class move_command : public boe_bot_command_base {
     /**
      * Time in which the destination cross was reached measured in absolute time.
      */
-    time_ttt cross_encountered_time;
+    time_type cross_encountered_time;
 
     /**
      * Move the robot so that it follows the line.
      *
      * @param time_elapsed Absolute time from the beginning of dance.
      */
-    void go_straight(const time_ttt &time_elapsed);
+    void go_straight(const time_type &time_elapsed);
 
     /**
      * Moves straight until it finds a cross (or partial cross = corner).
      *
      * @param time_elapsed Absolute time from the beginning of dance.
      */
-    void move_sensors_to_cross(const time_ttt &time_elapsed);
+    void move_sensors_to_cross(const time_type &time_elapsed);
 
     /**
      * Move the robot forwards until the sensors are out of the cross.
@@ -39,7 +39,7 @@ class move_command : public boe_bot_command_base {
      *
      * @param time_elapsed Absolute time from the beginning of dance.
      */
-    void move_wheels_to_cross(const time_ttt &time_elapsed);
+    void move_wheels_to_cross(const time_type &time_elapsed);
 
 public:
 
@@ -56,7 +56,7 @@ public:
      *
      * @param time_elapsed Absolute elapsed time from the start of the dance.
      */
-    virtual void update(const time_ttt &time_elapsed) override;
+    virtual void update(const time_type &time_elapsed) override;
 
     /**
      * Force this command to stop regardless of its state.
@@ -74,7 +74,7 @@ public:
 inline move_command::move_command(boe_bot *robot_p, location final_location_p) : boe_bot_command_base(robot_p,
                                                                                                       final_location_p) {};
 
-inline void move_command::go_straight(const time_ttt &time_elapsed) {
+inline void move_command::go_straight(const time_type &time_elapsed) {
     /* If on cross, move slowly */
     if (this->robot->get_sensors().middle()) {
         this->robot->quarter_forward();
@@ -94,7 +94,7 @@ inline void move_command::go_straight(const time_ttt &time_elapsed) {
     }
 };
 
-inline void move_command::move_sensors_to_cross(const time_ttt &time_elapsed) {
+inline void move_command::move_sensors_to_cross(const time_type &time_elapsed) {
     //assuming command is first called when all sensors are not at line
     //NOTE: this should work even in the corners of the grid
     if ((robot->get_sensors().left_part() || robot->get_sensors().right_part()) && robot->get_sensors().middle()) {
@@ -108,7 +108,7 @@ inline void move_command::move_sensors_to_cross(const time_ttt &time_elapsed) {
 
 };
 
-inline void move_command::move_wheels_to_cross(const time_ttt &time_elapsed) {
+inline void move_command::move_wheels_to_cross(const time_type &time_elapsed) {
 //    //TODO find appropriate constant or do in more advanced way
 //    if (time_elapsed - cross_encountered_time < 300) {
     /* Go straight until you get sensors out of the cross */
@@ -125,7 +125,7 @@ inline void move_command::move_wheels_to_cross(const time_ttt &time_elapsed) {
     }
 };
 
-inline void move_command::update(const time_ttt &time_elapsed) {
+inline void move_command::update(const time_type &time_elapsed) {
     if (is_done()) {
         return;
     }
