@@ -7,6 +7,7 @@
 #include "location.h"
 #include "sensors.hpp"
 #include "wheel_control.hpp"
+#include "planning.h"
 #include "command_parser_eeprom.hpp"
 #include "push_button.hpp"
 
@@ -22,35 +23,51 @@ class boe_bot {
 
     wheel_control wheels;
     sensors ir_sensors;
-    command_parser cmd_parser;
     push_button button;
 
+	bool lastMoveEncounteredLeft;
+	bool lastMoveEncounteredRight;
+
 public:
+	boe_bot() :location_state(0,0,direction::East) {}
+
+
+	bool get_lastMoveEncounteredLeft() const
+	{
+		return lastMoveEncounteredLeft;
+	}
+
+	bool get_lastMoveEncounteredRight() const
+	{
+		return lastMoveEncounteredRight;
+	}
+
+	void set_last_move_encounters() {
+		lastMoveEncounteredLeft = get_sensors().first_left();
+		lastMoveEncounteredRight = get_sensors().first_right();
+	}
+
+	void clear_last_move_encounters() {
+		lastMoveEncounteredLeft = false;
+		lastMoveEncounteredRight = false;
+	}
 
     /**
      * Gets the button object.
      *
      * @return The button object.
      */
-    const push_button &get_button() const {
+    const push_button &get_button() {
         return button;
     }
 
-    /**
-     * Gets command parser with access to whole instruction queue.
-     *
-     * @return The command parser with access to whole instruction queue.
-     */
-    command_parser *get_command_parser() const {
-        return &cmd_parser;
-    }
 
     /**
      * Gets sensors states containing last measurements.
      *
      * @return The sensors states containing last measurements.
      */
-    sensors get_sensors() const {
+    sensors& get_sensors() {
         return ir_sensors;
     }
 
@@ -180,7 +197,8 @@ public:
         wheels.init_servos();
     }
 
-    void start() {
+    void start(command_parser& cmd_parser) {
+
         /* The length of first button push decides what do do next */
         bool longPress = button.check_long_press_button();
 

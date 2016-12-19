@@ -5,6 +5,7 @@
 #define ARUINO
 
 #include "location.h"
+#include "boe_bot.hpp"
 #include "boe_bot_planner.h"
 #include "command_parser_mocap.h"
 
@@ -18,20 +19,26 @@ void setup() {
 }
 
 void loop() {
-    robot.start();
 
-//    cmd_parser = new command_parser_mocap();
-    cmd_parser = robot.get_command_parser();
+    cmd_parser = new command_parser_mocap();
+    robot.start(*cmd_parser);
+
+        robot.set_location(cmd_parser->get_initial_location());
+    //cmd_parser = robot.get_command_parser();
 
 	//TODO set proper square dimensions!!!!
     //NOTE: dimensions do not have to be known at the beginning
-	pl = new boe_bot_planner(&robot, 5, 5);
+	pl = new boe_bot_planner(&robot, 4, 4);
 
     time_type start_time = millis();
     bool button_pushed = false;
 
+	robot.get_button().wait_for_button_push();
+	robot.get_button().wait_for_button_release();
+
+	Serial.print("ahoj");
     /* Execute dance */
-    while (!cmd_parser->fetch_next() && !button_pushed) {
+    while (cmd_parser->fetch_next()) {
         Serial.print("-> Creating route to { ");
         Serial.print(cmd_parser->get_current_target().get_x());
         Serial.print(", ");
@@ -58,14 +65,20 @@ void loop() {
             Serial.print("processing: ");
             Serial.println(cur_cmd->get_name());
 
-            while (!cur_cmd->is_done())
-                cur_cmd->update(millis() - start_time);
+			while (!cur_cmd->is_done())
+			{
+				robot.get_sensors().read_sensors();
+				cur_cmd->update(millis() - start_time);
+			}
         }
     }
 
+	robot.stop();
+
     /* Return to the starting position */
-    pl->prepare_route(robot.get_location(), cmd_parser->get_initial_location(), false, 0);
+    //pl->prepare_route(robot.get_location(), cmd_parser->get_initial_location(), false, 0);
 
 	delete pl;
-	delete cmd_parser;
+
+	while (true);
 }

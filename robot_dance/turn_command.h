@@ -69,6 +69,14 @@ void turn_command::update(const time_type &time_elapsed) {
     /* First call to this function */
     if (state == command_state::PREPARED) {
         state = command_state::IN_PROCESS;
+
+		if (left && robot->get_lastMoveEncounteredLeft() ||
+			(!left && robot->get_lastMoveEncounteredRight()))
+		{
+			//next turn command will do the job on borders
+			robot->clear_last_move_encounters();
+			finish();
+		}
     }
 
     if (leavingFirstLine) {

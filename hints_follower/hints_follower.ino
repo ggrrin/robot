@@ -25,7 +25,7 @@
 #include "button.h"
 
 #define SPIRAL_DELAY    (500)
-#define STATE_FIXATION  (5000)
+#define STATE_FIXATION  (7000)
 
 
 /**
@@ -82,8 +82,13 @@ void loop() {
         /* Přečtení všech nových hodnot */
         read_sensors();
 
+		//stop at finish
+		if (first_left() && first_right())
+			break;
+
         /* Přenastavení stavu podle nápovědy */
         handle_hints();
+
 
         /* Prioritu pravého a levého sensoru určuje stav daný nápovědou */
         if (turnRight) {

@@ -186,9 +186,7 @@ int square_grid_planner::try_turn(const direction &from, const direction &to, bo
             case NotSpecified:break;
         }
 
-		//if we are turning sensor point (pos + direction) to square (borders inclusive) it is always correct
-		//if we assume model from assignment !!!!! (turning with sensor point from outside p1 to outside p2 doesn't make sense
-		if (add_commands && !is_outside_square(rotation_position + position(direction_i)))
+		if (add_commands)
 			add_command(get_turn_cmd(!clockwise, location(rotation_position, direction_i)));
 	}
 
@@ -238,8 +236,7 @@ inline bool square_grid_planner::prepare_route(const location& source, const loc
 {
 	clear_commands();
 
-	if (source.get_direction() == direction::NotSpecified
-		|| is_outside_square(source.get_position()) || is_outside_square(target.get_position())) {
+	if (source.get_direction() == direction::NotSpecified){
 #ifdef ARDUINO
 		Serial.println("Some of the arguments passed to prepare_route are invalid");
 #endif

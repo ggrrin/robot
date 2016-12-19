@@ -84,7 +84,7 @@ void in_place_left() {
  * Pomalejší zatáčení doleva obloukem.
  */
 void slightly_left() {
-    left_speed(-0.05);
+    left_speed(-0.1);
     right_speed(0.2);
 }
 
@@ -109,7 +109,7 @@ void in_place_right() {
  */
 void slightly_right() {
     left_speed(0.2);
-    right_speed(-0.05);
+    right_speed(-0.1);
 }
 
 /**

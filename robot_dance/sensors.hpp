@@ -48,6 +48,23 @@ public:
         for (int i = 0; i < NUM_SENSORS; i++) {
             sensor_values[i] = digitalRead(sensors[i]);
         }
+
+		//for (int i = 0; i < NUM_SENSORS; i++) {
+		//	Serial.print(sensor_values[i]);
+		//	Serial.print(" ");
+		//	
+		//}
+		//Serial.println();
+
+		//for (int i = 0; i < NUM_SENSORS; i++) {
+		//	Serial.print(sensor_values[i]);
+		//	Serial.print(" ");
+		//	
+		//}
+		//Serial.println();
+
+
+
     }
 
     /**
@@ -74,7 +91,18 @@ public:
      * @return If the middle sensor is reading black color.
      */
     boolean middle() const {
-        return sensor_values[2] == BLACK;
+        bool res = sensor_values[2] == BLACK;
+		//Serial.print("middle ");
+		//Serial.println(res);
+
+		/*for (int i = 0; i < NUM_SENSORS; i++) {
+			Serial.print(sensor_values[i]);
+			Serial.print(" ");
+			
+		}*/
+		//Serial.println();
+
+		return  res;
     }
 
     /**

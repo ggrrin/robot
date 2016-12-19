@@ -12,7 +12,7 @@ class move_command : public boe_bot_command_base {
     /**
      * Defines if the destination cross was encountered.
      */
-    bool cross_encountered;
+    bool cross_encountered = false;
 
     /**
      * Time in which the destination cross was reached measured in absolute time.
@@ -77,6 +77,7 @@ inline move_command::move_command(boe_bot *robot_p, location final_location_p) :
                                                                                                       final_location_p) {};
 
 inline void move_command::go_straight(const time_type &time_elapsed) {
+	//Serial.println("ahoj got straight");
     /* If on cross, move slowly */
     if (this->robot->get_sensors().middle()) {
         this->robot->quarter_forward();
@@ -90,31 +91,25 @@ inline void move_command::go_straight(const time_type &time_elapsed) {
         this->robot->slightly_left();
         return;
     }
-    if (this->robot->get_sensors().middle()) {
-        this->robot->half_forward();
-        return;
-    }
+
+	this->robot->half_forward();
 };
 
 inline void move_command::move_sensors_to_cross(const time_type &time_elapsed) {
-    //assuming command is first called when all sensors are not at line
+    //assuming command is first called when right most and left most sensors are not at line
     //NOTE: this should work even in the corners of the grid
-    if ((robot->get_sensors().left_part() || robot->get_sensors().right_part()) && robot->get_sensors().middle()) {
+    if (robot->get_sensors().first_left() || robot->get_sensors().first_right()){
         cross_encountered = true;
         cross_encountered_time = time_elapsed;
-
-        return;
+		robot->set_last_move_encounters();
     } else {
         go_straight(time_elapsed);
     }
-
 };
 
 inline void move_command::move_wheels_to_cross(const time_type &time_elapsed) {
-//    //TODO find appropriate constant or do in more advanced way
-//    if (time_elapsed - cross_encountered_time < 300) {
-    /* Go straight until you get sensors out of the cross */
-    if ((robot->get_sensors().left_part() || robot->get_sensors().right_part()) && robot->get_sensors().middle()) {
+    //NOTE: 300 ms seems to be appropriate 
+    if (time_elapsed - cross_encountered_time < 300) {
         go_straight(time_elapsed);
     } else {
         robot->stop();
@@ -137,8 +132,8 @@ inline void move_command::update(const time_type &time_elapsed) {
         state = command_state::IN_PROCESS;
     }
 
-    if (cross_encountered)
-        move_wheels_to_cross(time_elapsed);
+	if (cross_encountered)
+		move_wheels_to_cross(time_elapsed);
     else
         move_sensors_to_cross(time_elapsed);
 };
@@ -146,8 +141,6 @@ inline void move_command::update(const time_type &time_elapsed) {
 
 inline bool move_command::force_stop() {
 	finish();
-	//TODO co vrací? 
-	//taky mi to ted nedava smysl :D ... ono se to snad vubec nebude pouzivat
 
 	return true;
 }

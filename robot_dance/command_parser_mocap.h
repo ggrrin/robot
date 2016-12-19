@@ -9,25 +9,39 @@
 //#define CMP
 class command_parser_mocap : public command_parser
 {
+
+	virtual bool fetch_initial() override {};
+	virtual bool store_character(const char &character) {};
+	virtual void reset_commands() {};
+
 #ifdef MOVE
-	position pos[10] = {
+	int size = 3;
+	position pos[3] = {
 		position(1,0),
+		position(2,0),
+		position(3,0),
 	};
 
-	bool firstX[10] = {
-		false,
+	bool firstX[3] = {
+		true,
+		true,
+		true,
 	};
 
 	time_type times[10]{
 		0,
+		0,
+		0,
 	};
 
 	location initial_location  = location(0,0, direction::East);
+	
 
 #endif
 
 #ifdef  TURNL
-	position pos[10] = {
+	int size = 1;
+	position pos[1] = {
 		position(4,3),
 	};
 
@@ -43,7 +57,8 @@ class command_parser_mocap : public command_parser
 #endif
 
 #ifdef TURNR
-	position pos[10] = {
+	int size = 1;
+	position pos[1] = {
 		position(2,3),
 	};
 
@@ -60,11 +75,12 @@ class command_parser_mocap : public command_parser
 
 #ifdef CMP
 
-	position pos[10] = {
-		position(0,0),
+	int size = 4;
+	position pos[4] = {
 		position(2,3),
 		position(1,1),
 		position(0,0),
+		position(3,3)
 	};
 
 	bool firstX[10] = {
@@ -103,7 +119,8 @@ inline command_parser_mocap::command_parser_mocap(): current_instruction(-1)
 inline bool command_parser_mocap::fetch_next()
 {
 	current_instruction++;
-	return current_instruction < sizeof(pos);
+	bool res = current_instruction < size;
+	return res;
 }
 
 inline location command_parser_mocap::get_initial_location()
