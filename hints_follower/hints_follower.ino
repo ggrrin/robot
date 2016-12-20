@@ -10,9 +10,10 @@
  *          spirálovité prohledávání
  *      3) robot se snaží po rovné čáře jet poloviční rychlostí
  *          - aby lépe zvládal detekci zatáček
- *      4) krajní senzory používá pouze pro detekci nápovědy
+ *      4) krajní senzory používá pouze pro detekci nápovědy a cílové pozice
  *          - stav podle nápovědy se nemění po pevně danou dobu
  *            od její detekce pro zamezení falešných detekcí před spojením tratí
+ *          - po detekci cíle robot zastaví
  *      5) při aktivaci mezisensorů přikládá prioritu senzoru,
  *          který odpovídá poslední zaznamenané nápovědě
  */
@@ -74,21 +75,18 @@ void loop() {
     /* Vyčkání na stisk tlačítka */
     wait_for_button(button, LOW);
 
-
     /* Spuštění sledování čáry */
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wmissing-noreturn"
     while (1) {
         /* Přečtení všech nových hodnot */
         read_sensors();
 
-		//stop at finish
-		if (first_left() && first_right())
-			break;
+		/* At the finish, stop following the line */
+		if (first_left() && first_right()) {
+            break;
+        }
 
         /* Přenastavení stavu podle nápovědy */
         handle_hints();
-
 
         /* Prioritu pravého a levého sensoru určuje stav daný nápovědou */
         if (turnRight) {
@@ -127,7 +125,9 @@ void loop() {
             continue;
         }
     }
-#pragma clang diagnostic pop
+
+    /* End of the main loop, stop the robot and wait again for button */
+    stop();
 }
 
 /**

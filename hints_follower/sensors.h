@@ -26,7 +26,6 @@ void init_sensors() {
     for (int i = 0; i < NUM_SENSORS; i++) {
         pinMode(sensors[i], INPUT);
     }
-
 }
 
 /**
@@ -36,8 +35,6 @@ void read_sensors() {
     for (int i = 0; i < NUM_SENSORS; i++) {
         sensor_values[i] = digitalRead(sensors[i]);
     }
-
-
 }
 
 /**
