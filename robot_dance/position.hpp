@@ -9,7 +9,6 @@
  * Provides four basic directions, to which robot can be commanded.
  */
 enum direction {
-    //values and clock wise order is important(used in planner)
     NotSpecified = -1, North, East, South, West
 };
 
@@ -38,6 +37,10 @@ public:
      * @param y_p Position on vertical axis.
      */
     position(int x_p, int y_p);
+
+    /**
+     * Creates a new position at (0;0) coordinates.
+     */
     position();
 
     /**
@@ -154,7 +157,7 @@ public:
 
 position::position(int x_p, int y_p) : x(x_p), y(y_p) {}
 
-inline position::position() : position(0,0) {};
+inline position::position() : position(0, 0) {};
 
 position::position(direction direction_p) :
         x(direction_p == direction::West ? -1 : (direction_p == East ? 1 : 0)),

@@ -42,10 +42,8 @@ public:
      * Create a new planner capable to make plans for given grid size.
      *
      * @param robot_p Robot to take commands.
-     * @param width_p Width of the grid, number of columns.
-     * @param height_p Height of the grid, number of rows.
      */
-    boe_bot_planner(boe_bot *robot_p, int width_p, int height_p);
+    boe_bot_planner(boe_bot *robot_p);
 
 };
 
@@ -53,9 +51,7 @@ public:
 
 //class boe_bot_planner
 
-inline boe_bot_planner::boe_bot_planner(boe_bot *robot_p, int width_p, int height_p) : square_grid_planner(width_p,
-                                                                                                           height_p),
-                                                                                       robot(robot_p) {};
+inline boe_bot_planner::boe_bot_planner(boe_bot *robot_p) : square_grid_planner(), robot(robot_p) {};
 
 inline command *boe_bot_planner::get_move_forward_cmd(const location &final_location) {
     return new move_command(robot, final_location);

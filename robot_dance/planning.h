@@ -24,10 +24,6 @@ public:
          */
         IN_PROCESS,
         /**
-         * Command is done, but waits for clock - time synchronization.
-         */
-        WAITING,
-        /**
          * Command is done, time condition is fulfilled.
          */
         FINISHED
@@ -35,7 +31,7 @@ public:
 
     virtual ~command() {}
 
-    virtual void update(const time_type &time_elapsed) = 0;
+    virtual void update() = 0;
 
     virtual bool is_done() = 0;
 
@@ -48,7 +44,7 @@ public:
      *
      * @return The printable name of the command.
      */
-    virtual char* get_name() = 0;
+    virtual char *get_name() = 0;
 
 };
 
@@ -73,7 +69,7 @@ public:
  */
 class command_parser {
 public:
-	virtual ~command_parser() {}
+    virtual ~command_parser() {}
 
     /**
      * Prepares the initial location & direction.
@@ -82,40 +78,40 @@ public:
      */
     virtual bool fetch_initial() = 0;
 
-	/**
-	 * Prepares next command.
-	 *
-	 * @return If next command exists.
-	 */
-	virtual bool fetch_next() = 0;
+    /**
+     * Prepares next command.
+     *
+     * @return If next command exists.
+     */
+    virtual bool fetch_next() = 0;
 
-	/**
-	 * Gets the first/home/initial position.
-	 *
-	 * @return The first/home/initial position.
-	 */
-	virtual location get_initial_location() = 0;
+    /**
+     * Gets the first/home/initial position.
+     *
+     * @return The first/home/initial position.
+     */
+    virtual location get_initial_location() = 0;
 
-	/**
-	 * Gets the current target position.
-	 *
-	 * @return The current target position.
-	 */
-	virtual position get_current_target() = 0;
+    /**
+     * Gets the current target position.
+     *
+     * @return The current target position.
+     */
+    virtual position get_current_target() = 0;
 
-	/**
-	 * Desides if the horizontal axis has higher priority.
-	 *
-	 * @return If the horizontal axis has higher priority.
-	 */
-	virtual bool is_first_directionX() = 0;
+    /**
+     * Decides if the horizontal axis has higher priority.
+     *
+     * @return If the horizontal axis has higher priority.
+     */
+    virtual bool is_first_directionX() = 0;
 
-	/**
-	 * Gets absolute time, when the current command should end.
-	 *
-	 * @return The absolute time, when the current command should end.
-	 */
-	virtual time_type get_finish_time_constrain() = 0;
+    /**
+     * Gets absolute time, when the current command should end.
+     *
+     * @return The absolute time, when the current command should end.
+     */
+    virtual time_type get_finish_time_constrain() = 0;
 
     /**
      * Tries to add and parse one new character from dance sequence.

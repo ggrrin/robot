@@ -46,11 +46,32 @@ protected:
     void finish();
 
 public:
+
     virtual ~boe_bot_command_base() {};
 
     virtual bool is_done() override;
 
     virtual void set_time_constrain(const time_type &time_constrain) override;
+
+    /**
+     * Force this command to stop regardless of its state.
+     *
+     * @return //TODO co vrací?
+     */
+    virtual bool force_stop() {
+        finish();
+
+        return true;
+    };
+
+    /**
+     * Gets human-readable string representation of this command.
+     *
+     * @return The human-readable string representation of this command.
+     */
+    virtual char *get_name() {
+        return (char *) "boe_bot_command_base command";
+    };
 
 };
 
