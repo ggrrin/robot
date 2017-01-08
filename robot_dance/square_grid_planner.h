@@ -19,8 +19,9 @@ private:
      * Adds given command to the queue if there is space in the queue.
      *
      * @param command New command to be queued.
+     * @return If the command could be added to the queue.
      */
-    void add_command(command *command);
+    bool add_command(command *command);
 
     /**
      * Adds rotation commands to the queue so that from given direction to desired position
@@ -96,11 +97,9 @@ public:
      * @param source Initial location.
      * @param target Desired target location.
      * @param moveFirstX Defines axis priority.
-     * @param time_constrain_p Maximum absolute time for this command.
      * @return returns false on failure otherwise true
      */
-    virtual bool prepare_route(const location &source, const location &target, bool moveFirstX,
-                               const time_type &time_constrain_p) override;
+    virtual bool prepare_route(const location &source, const location &target, bool moveFirstX) override;
 
     /**
      * Gets next command from the queue or nullptr if queue is empty.
@@ -137,15 +136,17 @@ inline void square_grid_planner::clear_commands() {
     current_cmd_index = 0;
 }
 
-inline void square_grid_planner::add_command(command *command) {
+inline bool square_grid_planner::add_command(command *command) {
     if (length >= command_length_estimate) {
 #ifdef ARDUINO
         Serial.println("Error in planner - command buffer exceeded");
 #endif
-        return;
+        return false;
     }
 
     commands[length++] = command;
+
+    return true;
 }
 
 int square_grid_planner::try_turn(const direction &from, const direction &to, bool clockwise, bool add_commands,
@@ -172,7 +173,9 @@ int square_grid_planner::try_turn(const direction &from, const direction &to, bo
         }
 
         if (add_commands) {
-            add_command(get_turn_cmd(!clockwise, location(rotation_position, direction_i)));
+            if (!add_command(get_turn_cmd(!clockwise, location(rotation_position, direction_i)))) {
+                break;
+            }
         }
     }
 
@@ -197,16 +200,18 @@ inline position square_grid_planner::add_go_straight_commands(const location &st
 
     for (size_t i = 0; i < count; i++) {
         current_position += move;
-        add_command(get_move_forward_cmd(location(current_position, start_location.get_direction())));
+        if (!add_command(get_move_forward_cmd(location(current_position, start_location.get_direction())))) {
+            break;
+        }
     }
 
     return current_position;
 };
 
-inline bool square_grid_planner::prepare_route(const location &source, const location &target, bool moveFirstX,
-                                               const time_type &time_constrain_p) {
+inline bool square_grid_planner::prepare_route(const location &source, const location &target, bool moveFirstX) {
     clear_commands();
 
+    //TODO: následující kód přesunout jinam
     if (source.get_direction() == direction::NotSpecified) {
 #ifdef ARDUINO
         Serial.println("Some of the arguments passed to prepare_route are invalid");
@@ -248,18 +253,16 @@ inline bool square_grid_planner::prepare_route(const location &source, const loc
         add_rotation_commands(last_position, last_direction, target.get_direction());
     }
 
-    if (length > 0) {
-        commands[length - 1]->set_time_constrain(time_constrain_p);
-    }
-
     return true;
 };
 
 inline command *square_grid_planner::get_next_command() {
-    if (current_cmd_index >= length) {
-        return nullptr;
+    clear_commands();
+    //TODO: prepare_route na aktuální a target pozici
+    if (commands != nullptr) {
+        return commands[0];
     } else {
-        return commands[current_cmd_index++];
+        return nullptr;
     }
 };
 

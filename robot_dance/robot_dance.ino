@@ -61,7 +61,7 @@ void loop() {
 
         if (!pl->prepare_route(robot.get_location(),
                                location(cmd_parser->get_current_target(), direction::NotSpecified),
-                               cmd_parser->is_first_directionX(), cmd_parser->get_finish_time_constrain())) {
+                               cmd_parser->is_first_directionX())) {
             Serial.println("Error invalid arguments in prepare route -> Ignoring....");
             Serial.flush();
             continue;
@@ -108,7 +108,7 @@ void loop() {
 
     if (robot.do_go_home()) {
         /* Return to the starting position */
-        pl->prepare_route(robot.get_location(), init_location, false, 0);
+        pl->prepare_route(robot.get_location(), init_location, false);
         command *cur_cmd = nullptr;
         while ((cur_cmd = pl->get_next_command()) != nullptr) {
             Serial.print("processing: ");

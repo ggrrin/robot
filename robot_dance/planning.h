@@ -35,10 +35,6 @@ public:
 
     virtual bool is_done() = 0;
 
-    virtual bool force_stop() = 0;
-
-    virtual void set_time_constrain(const time_type &time_constrain) = 0;
-
     /**
      * Gets printable name of the command.
      *
@@ -57,8 +53,7 @@ public:
 
     virtual ~planner() {}
 
-    virtual bool prepare_route(const location &source, const location &target, bool moveFirstX,
-                               const time_type &time_constrain_p) = 0;
+    virtual bool prepare_route(const location &source, const location &target, bool moveFirstX) = 0;
 
     virtual command *get_next_command() = 0;
 

@@ -83,12 +83,7 @@ public:
 		return done;
 	}
 
-	bool force_stop() override
-	{
-		return false;
-	}
-
-	void set_time_constrain(const time_type& time_constrain) override
+    void set_time_constrain(const time_type& time_constrain) override
 	{
 
 	}
@@ -152,12 +147,7 @@ public:
 		return done;
 	}
 
-	bool force_stop() override
-	{
-		return false;
-	}
-
-	void set_time_constrain(const time_type& time_constrain) override
+    void set_time_constrain(const time_type& time_constrain) override
 	{
 
 	}
