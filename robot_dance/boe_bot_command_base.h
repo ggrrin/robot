@@ -10,17 +10,13 @@
  */
 class boe_bot_command_base : public command {
 
+private:
     /**
      * Desired final position and direction of the robot.
      */
     location final_location;
 
 protected:
-
-    /**
-     * Absolute time (from the beginning of the dance), before which this command must be performed.
-     */
-    time_type time_constrain;
 
     /**
      * Robot performing the command tasks.
@@ -39,6 +35,14 @@ protected:
      * @param final_location_p Desired final position & rotation of the robot.
      */
     boe_bot_command_base(boe_bot *robot_p, location final_location_p);
+
+    /**
+     * Alternative 'constructor' to avoid dynamic allocation.
+     *
+     * @param robot_p Robot to be commanded.
+     * @param final_location_p Desired final position & rotation of the robot.
+     */
+    void init(boe_bot *robot_p, location final_location_p);
 
     /**
      * Mark this command as completed, robot's position is moved to desired location.
@@ -69,8 +73,13 @@ public:
 inline boe_bot_command_base::boe_bot_command_base(boe_bot *robot_p, location final_location_p) : state(PREPARED),
                                                                                                  final_location(
                                                                                                          final_location_p),
-                                                                                                 time_constrain(0),
                                                                                                  robot(robot_p) {}
+
+void boe_bot_command_base::init(boe_bot *robot_p, location final_location_p) {
+    state = PREPARED;
+    final_location = final_location_p;
+    robot = robot_p;
+}
 
 inline void boe_bot_command_base::finish() {
     robot->set_location(final_location);

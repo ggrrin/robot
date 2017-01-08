@@ -12,6 +12,18 @@
  * for routes making the robot go anywhere on the grid map.
  */
 class boe_bot_planner : public square_grid_planner {
+private:
+
+    /**
+     * Stores one move command locally to avoid dynamic allocation.
+     */
+    move_command _move_command;
+
+    /**
+     * Stores one turn command locally to avoid dynamic allocation.
+     */
+    turn_command _turn_command;
+
 protected:
 
     /**
@@ -51,14 +63,18 @@ public:
 
 //class boe_bot_planner
 
-inline boe_bot_planner::boe_bot_planner(boe_bot *robot_p) : square_grid_planner(), robot(robot_p) {};
+inline boe_bot_planner::boe_bot_planner(boe_bot *robot_p) : _move_command(robot_p, location()),
+                                                            _turn_command(false, robot_p, location()),
+                                                            square_grid_planner(), robot(robot_p) {};
 
 inline command *boe_bot_planner::get_move_forward_cmd(const location &final_location) {
-    return new move_command(robot, final_location);
+    _move_command.set(robot, final_location);
+    return &_move_command;
 };
 
 inline command *boe_bot_planner::get_turn_cmd(bool left, const location &final_location) {
-    return new turn_command(left, robot, final_location);
+    _turn_command.set(left, robot, final_location);
+    return &_turn_command;
 };
 
 #endif

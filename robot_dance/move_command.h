@@ -12,17 +12,17 @@ class move_command : public boe_bot_command_base {
     /**
      * Defines if the destination cross was encountered.
      */
-    bool cross_encountered = false;
+    bool cross_encountered;
 
     /**
      * Defines if the robot is correctly rotated on destination cross.
      */
-    bool cross_corrected = false;
+    bool cross_corrected;
 
     /**
      * Time in which the destination cross was reached measured in absolute time.
      */
-    time_type cross_encountered_time = 0;
+    time_type cross_encountered_time;
 
     /**
      * Time of start of this command.
@@ -62,6 +62,14 @@ public:
     explicit move_command(boe_bot *robot_p, location final_location_p);
 
     /**
+     * Alternative 'constructor' to avoid dynamic allocation.
+     *
+     * @param robot_p Robot to be commanded.
+     * @param final_location_p Desired final position of the robot.
+     */
+    void set(boe_bot *robot_p, const location &final_location_p);
+
+    /**
      * Continue to do this command.
      */
     virtual void update() override;
@@ -76,7 +84,16 @@ public:
 
 inline move_command::move_command(boe_bot *robot_p, location final_location_p) : boe_bot_command_base(robot_p,
                                                                                                       final_location_p),
-                                                                                 move_started(millis()) {};
+                                                                                 cross_encountered(false),
+                                                                                 cross_corrected(false),
+                                                                                 cross_encountered_time(0) {};
+
+void move_command::set(boe_bot *robot_p, const location &final_location_p) {
+    init(robot_p, final_location_p);
+    cross_encountered = false;
+    cross_corrected = false;
+    cross_encountered_time = 0;
+}
 
 inline void move_command::go_straight() {
     if (robot->get_sensors().middle()) {
@@ -96,7 +113,9 @@ inline void move_command::go_straight() {
 
 inline void move_command::encounter_cross() {
     /* Move must be at least a little bit long */
-    if ((robot->get_sensors().first_left() || robot->get_sensors().first_right())) {
+    if (millis() - move_started < 300) {
+        go_straight();
+    } else if ((robot->get_sensors().first_left() || robot->get_sensors().first_right())) {
         robot->led_on();
         cross_encountered = true;
         cross_encountered_time = millis();

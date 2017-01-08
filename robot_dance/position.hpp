@@ -2,8 +2,6 @@
 #ifndef POSITION_HPP
 #define POSITION_HPP
 
-//#include <Arduino.h>
-
 
 /**
  * Provides four basic directions, to which robot can be commanded.
@@ -151,17 +149,13 @@ public:
 
 };
 
-bool operator==(const position& lhs, const position& rhs)
-{
-	return lhs.get_x() == rhs.get_x() && lhs.get_y() == rhs.get_y();
+bool operator==(const position &lhs, const position &rhs) {
+    return lhs.get_x() == rhs.get_x() && lhs.get_y() == rhs.get_y();
 }
 
-bool operator!=(const position& lhs, const position& rhs)
-{
-	return  !(lhs == rhs);
+bool operator!=(const position &lhs, const position &rhs) {
+    return !(lhs == rhs);
 }
-
-
 
 
 

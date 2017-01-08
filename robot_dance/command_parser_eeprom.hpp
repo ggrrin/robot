@@ -7,7 +7,7 @@
 #include "planning.h"
 
 #define MAGIC           ("GV-01")
-#define DEFAULT_DANCE   ("A1N 2B T0 3C T0 4D T100 A1 T0 A4 T200 B3 T0 C2 T0 D1 T300 1A T0")
+#define DEFAULT_DANCE   ("A1N 2B T0 3C T0 4D T100 1A T0 A4 T200 B3 T0 C2 T0 D1 T300 1A T0")
 
 
 class command_parser_eeprom : public command_parser {
@@ -110,21 +110,21 @@ public:
 //class command_parser_eeprom
 
 command_parser_eeprom::command_parser_eeprom() : current_state(FIRST) {
-    Serial.println("First few chars from EEPROM:");
+    Serial.println(F("First few chars from EEPROM:"));
     for (int i = 0; i < 128; ++i) {
         Serial.print((char) EEPROM.read(i));
     }
-    Serial.println("...");
+    Serial.println(F("..."));
 
     if (!check_magic()) {
-        Serial.println("Magic not found, writing default...");
+        Serial.println(F("Magic not found, writing default..."));
         reset_commands();
         return;
     }
 }
 
 bool command_parser_eeprom::fetch_initial() {
-    Serial.println("Fetching initial position...");
+    Serial.println(F("Fetching initial position..."));
 
     bool _x;
     char next_character;
@@ -143,7 +143,7 @@ bool command_parser_eeprom::fetch_initial() {
         current_instruction = 0;
         current_address = sizeof(MAGIC);
         current_state = parser_state::FIRST;
-        Serial.println("Dance empty or invalid! Writing default...");
+        Serial.println(F("Dance empty or invalid! Writing default..."));
         reset_commands();
         return false;
     }

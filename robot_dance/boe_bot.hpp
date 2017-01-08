@@ -236,6 +236,27 @@ public:
     }
 
     /**
+     * Procedure to be called before smoothing version of the wheel control.
+     * Calculates properly sequential number of calls of the given function.
+     * Disables smoothing automatically if it is not requested.
+     *
+     * @param movement_function Function which is called to act as smooth.
+     */
+    void common_smoothing_procedure(void (boe_bot::*movement_function)(void)) {
+        if (smooth_drive) {
+            if (last_wheel_control == movement_function) {
+                ++num_calls;
+            } else {
+                num_calls = 1;
+                last_wheel_control = movement_function;
+                wheels.store_current_to_previous();
+            }
+        } else {
+            num_calls = 0;
+        }
+    }
+
+    /**
      * Immediately stops the robot wheels.
      * NOTE: does not have to mean the robot will not move slightly because
      * of wrong wheels calibration.
@@ -268,20 +289,10 @@ public:
     }
 
     /**
-     * Dopředná jízda plnou rychlostí.
+     * Move forward with full speed.
      */
     void full_forward() {
-        if (smooth_drive) {
-            if (last_wheel_control == &boe_bot::full_forward) {
-                ++num_calls;
-            } else {
-                num_calls = 1;
-                last_wheel_control = &boe_bot::full_forward;
-                wheels.store_current_to_previous();
-            }
-        } else {
-            num_calls = 0;
-        }
+        common_smoothing_procedure(&boe_bot::full_forward);
         wheels.left_speed(FULL, num_calls);
         wheels.right_speed(FULL, num_calls);
     }
@@ -290,17 +301,7 @@ public:
      * Move forward with half speed.
      */
     void half_forward() {
-        if (smooth_drive) {
-            if (last_wheel_control == &boe_bot::half_forward) {
-                ++num_calls;
-            } else {
-                num_calls = 1;
-                last_wheel_control = &boe_bot::half_forward;
-                wheels.store_current_to_previous();
-            }
-        } else {
-            num_calls = 0;
-        }
+        common_smoothing_procedure(&boe_bot::half_forward);
         wheels.left_speed(HALF, num_calls);
         wheels.right_speed(HALF, num_calls);
     }
@@ -309,17 +310,7 @@ public:
      * Move forward with quarter speed.
      */
     void quarter_forward() {
-        if (smooth_drive) {
-            if (last_wheel_control == &boe_bot::quarter_forward) {
-                ++num_calls;
-            } else {
-                num_calls = 1;
-                last_wheel_control = &boe_bot::quarter_forward;
-                wheels.store_current_to_previous();
-            }
-        } else {
-            num_calls = 0;
-        }
+        common_smoothing_procedure(&boe_bot::quarter_forward);
         wheels.left_speed(QUARTER, num_calls);
         wheels.right_speed(QUARTER, num_calls);
     }
@@ -328,17 +319,7 @@ public:
      * Turn around on current spot in anticlockwise direction.
      */
     void in_place_left() {
-        if (smooth_drive) {
-            if (last_wheel_control == &boe_bot::in_place_left) {
-                ++num_calls;
-            } else {
-                num_calls = 1;
-                last_wheel_control = &boe_bot::in_place_left;
-                wheels.store_current_to_previous();
-            }
-        } else {
-            num_calls = 0;
-        }
+        common_smoothing_procedure(&boe_bot::in_place_left);
         wheels.left_speed(-FULL, num_calls);
         wheels.right_speed(FULL, num_calls);
     }
@@ -347,55 +328,25 @@ public:
      * Turn around on current spot in anticlockwise direction in half speed.
      */
     void in_place_left_half() {
-        if (smooth_drive) {
-            if (last_wheel_control == &boe_bot::in_place_left_half) {
-                ++num_calls;
-            } else {
-                num_calls = 1;
-                last_wheel_control = &boe_bot::in_place_left_half;
-                wheels.store_current_to_previous();
-            }
-        } else {
-            num_calls = 0;
-        }
+        common_smoothing_procedure(&boe_bot::in_place_left_half);
         wheels.left_speed(-QUARTER, num_calls);
         wheels.right_speed(QUARTER, num_calls);
     }
 
     /**
-     * Pomalejší zatáčení doleva obloukem.
-     */
+    * Slow turn-right movement.
+    */
     void slightly_left() {
-        if (smooth_drive) {
-            if (last_wheel_control == &boe_bot::slightly_left) {
-                ++num_calls;
-            } else {
-                num_calls = 1;
-                last_wheel_control = &boe_bot::slightly_left;
-                wheels.store_current_to_previous();
-            }
-        } else {
-            num_calls = 0;
-        }
+        common_smoothing_procedure(&boe_bot::slightly_left);
         wheels.left_speed(STOP, num_calls);
         wheels.right_speed(QUARTER, num_calls);
     }
 
     /**
-     * Nejprudší zatáčení doleva obloukem.
-     */
+    * Sharpest turn-right movement.
+    */
     void sharply_left() {
-        if (smooth_drive) {
-            if (last_wheel_control == &boe_bot::sharply_left) {
-                ++num_calls;
-            } else {
-                num_calls = 1;
-                last_wheel_control = &boe_bot::sharply_left;
-                wheels.store_current_to_previous();
-            }
-        } else {
-            num_calls = 0;
-        }
+        common_smoothing_procedure(&boe_bot::sharply_left);
         wheels.left_speed(STOP, num_calls);
         wheels.right_speed(FULL, num_calls);
     }
@@ -404,17 +355,7 @@ public:
      * Turn around on current spot in clockwise direction.
      */
     void in_place_right() {
-        if (smooth_drive) {
-            if (last_wheel_control == &boe_bot::in_place_right) {
-                ++num_calls;
-            } else {
-                num_calls = 1;
-                last_wheel_control = &boe_bot::in_place_right;
-                wheels.store_current_to_previous();
-            }
-        } else {
-            num_calls = 0;
-        }
+        common_smoothing_procedure(&boe_bot::in_place_right);
         wheels.left_speed(FULL, num_calls);
         wheels.right_speed(-FULL, num_calls);
     }
@@ -423,57 +364,25 @@ public:
      * Turn around on current spot in clockwise direction with half speed.
      */
     void in_place_right_half() {
-        if (smooth_drive) {
-            if (last_wheel_control == &boe_bot::in_place_right_half) {
-                ++num_calls;
-            } else {
-                num_calls = 1;
-                last_wheel_control = &boe_bot::in_place_right_half;
-                wheels.store_current_to_previous();
-            }
-        } else {
-            num_calls = 0;
-        }
+        common_smoothing_procedure(&boe_bot::in_place_right_half);
         wheels.left_speed(QUARTER, num_calls);
         wheels.right_speed(-QUARTER, num_calls);
     }
 
     /**
-    * Pomalejší zatáčení doprava obloukem.
+    * Slow turn-left movement.
     */
     void slightly_right() {
-        if (smooth_drive) {
-            if (last_wheel_control == &boe_bot::slightly_right) {
-                ++num_calls;
-            } else {
-                num_calls = 1;
-                last_wheel_control = &boe_bot::slightly_right;
-                wheels.store_current_to_previous();
-            }
-        } else {
-            num_calls = 0;
-        }
+        common_smoothing_procedure(&boe_bot::slightly_right);
         wheels.left_speed(QUARTER, num_calls);
         wheels.right_speed(STOP, num_calls);
-//        wheels.left_speed(FIFTH, num_calls);
-//        wheels.right_speed(-VERY_SLOW, num_calls);
     }
 
     /**
-    * Nejprudší zatáčení doprava obloukem.
+    * Sharpest turn-left movement.
     */
     void sharply_right() {
-        if (smooth_drive) {
-            if (last_wheel_control == &boe_bot::sharply_right) {
-                ++num_calls;
-            } else {
-                num_calls = 1;
-                last_wheel_control = &boe_bot::sharply_right;
-                wheels.store_current_to_previous();
-            }
-        } else {
-            num_calls = 0;
-        }
+        common_smoothing_procedure(&boe_bot::sharply_right);
         wheels.left_speed(FULL, num_calls);
         wheels.right_speed(STOP, num_calls);
     }
@@ -481,7 +390,7 @@ public:
     void setup() {
         /* Serial line speed initialization */
         Serial.begin(BAUD_SPEED);
-        Serial.println("\n\nSerial prepared");
+        Serial.println(F("\n\nSerial prepared"));
 
         /* Input button & sensors initialization */
         button.init_button();
@@ -498,9 +407,9 @@ public:
 
         /* Short button press, load previous dance */
         if (!longPress) {
-            Serial.println("Short button press.");
+            Serial.println(F("Short button press."));
             if (!cmd_parser.fetch_initial()) {
-                Serial.println("Magic does not match!");
+                Serial.println(F("Magic does not match!"));
                 cmd_parser.reset_commands();
             }
             return;
@@ -509,12 +418,12 @@ public:
         time_type start_time = millis();
 
         /* Long button press, read & save new dance until the button is pressed again (second push) */
-        Serial.println("Waiting for data...");
+        Serial.println(F("Waiting for data..."));
         do {
             if (Serial.available() > 0) {
                 const char value = (const char) Serial.read();
                 if (!cmd_parser.store_character(value)) {
-                    Serial.println("Incorrect input!");
+                    Serial.println(F("Incorrect input!"));
                     cmd_parser.reset_commands();
                     break;
                 }
@@ -531,7 +440,7 @@ public:
             }
         } while (!button.is_pushed());
         led_off();
-        Serial.println("No more input data is expected.");
+        Serial.println(F("No more input data is expected."));
 
         /* Next button push will start the new dance */
         button.wait_for_button_release();

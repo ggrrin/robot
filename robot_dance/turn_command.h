@@ -41,12 +41,20 @@ public:
     turn_command(bool left_p, boe_bot *robot_p, location final_location_p);
 
     /**
+     * Alternative 'constructor' to avoid dynamic allocation.
+     *
+     * @param left_p Direction of the rotation.
+     * @param robot_p Robot to be commanded.
+     * @param final_location_p Desired final position.
+     */
+    void set(bool left, boe_bot *robot_p, const location &final_location_p);
+
+    /**
      * Continue to do this command.
      */
     virtual void update() override;
 
     virtual char *get_name() override;
-
 };
 
 
@@ -54,8 +62,15 @@ public:
 //class turn_command
 
 inline turn_command::turn_command(bool left_p, boe_bot *robot_p, location final_location_p) : boe_bot_command_base(
-        robot_p, final_location_p), left(left_p), leavingFirstLine(true), middle_missed(false) {};
+        robot_p, final_location_p), left(left_p), leavingFirstLine(true), middle_missed(false), turn_started(0) {};
 
+void turn_command::set(bool left, boe_bot *robot_p, const location &final_location_p) {
+    init(robot_p, final_location_p);
+    turn_command::left = left;
+    leavingFirstLine = true;
+    middle_missed = false;
+    turn_started = 0;
+};
 
 //if planing is correct we don't have to take care of corners,
 //because planner should not add two (or three at corners) turn commands
@@ -74,7 +89,7 @@ void turn_command::update() {
 
         if (left && !robot->get_last_move_encountered_left() || (!left && !robot->get_last_move_encountered_right())) {
             //next turn command will do the job on borders
-            Serial.println("turn command skipped due to lack of path");
+            Serial.println(F("Turn command skipped due to lack of path"));
             robot->clear_last_move_encounters();
             robot->set_last_move_encountered_left(true);
             robot->set_last_move_encountered_right(true);
@@ -84,7 +99,7 @@ void turn_command::update() {
 
         if (!robot->get_sensors().middle()) {
             middle_missed = true;
-            Serial.println("middle missed!");
+            Serial.println(F("Middle missed!"));
         }
     }
 
@@ -135,6 +150,6 @@ inline char *turn_command::get_name() {
     } else {
         return (char *) "turn command [right]";
     }
-};
+}
 
 #endif
