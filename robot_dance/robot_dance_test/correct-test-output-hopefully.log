@@ -30,6 +30,8 @@ loc: {4, 1} South
 ->=>-> Testing square(5, 6) ||  loc: {0, 0} West
 -> Creating route to { 2, 3 } firstX 1
 processing: turn [left]
+loc: {0, 0} South
+processing: turn [left]
 loc: {0, 0} East
 processing: move
 loc: {1, 0} East
@@ -91,33 +93,10 @@ processing: move
 loc: {4, 2} South
 processing: move
 loc: {4, 1} South
-->=>-> Testing square(5, 6) ||  loc: {0, 0} North
--> Creating route to { 2, 3 } firstX 0
-processing: move
-loc: {0, 1} North
-processing: move
-loc: {0, 2} North
-processing: move
-loc: {0, 3} North
-processing: turn [right]
-loc: {0, 3} East
-processing: move
-loc: {1, 3} East
-processing: move
-loc: {2, 3} East
--> Creating route to { 1, 6 } firstX 0
-Error invalid arguments in prepare route -> Ignoring....
--> Creating route to { 3, -1 } firstX 1
-Error invalid arguments in prepare route -> Ignoring....
--> Creating route to { 5, 5 } firstX 1
-Error invalid arguments in prepare route -> Ignoring....
--> Creating route to { -1, 2 } firstX 0
-Error invalid arguments in prepare route -> Ignoring....
--> Creating route to { 3, 3 } firstX 1
-processing: move
-loc: {3, 3} East
 ->=>-> Testing square(3, 3) ||  loc: {0, 0} West
 -> Creating route to { 2, 0 } firstX 0
+processing: turn [left]
+loc: {0, 0} South
 processing: turn [left]
 loc: {0, 0} East
 processing: move
@@ -148,6 +127,8 @@ loc: {0, 0} South
 ->=>-> Testing square(3, 3) ||  loc: {0, 0} West
 -> Creating route to { 2, 0 } firstX 0
 processing: turn [left]
+loc: {0, 0} South
+processing: turn [left]
 loc: {0, 0} East
 processing: move
 loc: {1, 0} East
@@ -164,9 +145,10 @@ processing: move
 loc: {0, 0} West
 -> Creating route to { 2, 0 } firstX 1
 processing: turn [left]
+loc: {0, 0} South
+processing: turn [left]
 loc: {0, 0} East
 processing: move
 loc: {1, 0} East
 processing: move
 loc: {2, 0} East
-Press anything to exit...

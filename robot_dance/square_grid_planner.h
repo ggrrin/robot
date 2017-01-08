@@ -10,103 +10,108 @@
 class square_grid_planner : public planner {
 private:
 
-    /**
-     * Removes all commands.
-     */
-    void clear_commands();
+	/**
+	 * Removes all commands.
+	 */
+	void clear_commands();
 
-    /**
-     * Adds given command to the queue if there is space in the queue.
-     *
-     * @param command New command to be queued.
-     * @return If the command could be added to the queue.
-     */
-    bool add_command(command *command);
+	/**
+	 * Adds given command to the queue if there is space in the queue.
+	 *
+	 * @param command New command to be queued.
+	 * @return If the command could be added to the queue.
+	 */
+	bool add_command(command *command, const location & result_location);
 
-    /**
-     * Adds rotation commands to the queue so that from given direction to desired position
-     * minimal number steps is performed.
-     *
-     * @param rotation_position Original position.
-     * @param from Original direction.
-     * @param to Desired direction.
-     */
-    void add_rotation_commands(const position &rotation_position, const direction &from, const direction &to);
+	/**
+	 * Adds rotation commands to the queue so that from given direction to desired position
+	 * minimal number steps is performed.
+	 *
+	 * @param rotation_position Original position.
+	 * @param from Original direction.
+	 * @param to Desired direction.
+	 */
+	void add_rotation_commands(const position &rotation_position, const direction &from, const direction &to);
 
-    /**
-     * Adds given number of move commands to the queue.
-     *
-     * @param start_location Initial location.
-     * @param count Number of tiles to move through.
-     * @return Target position counted from given information.
-     */
-    position add_go_straight_commands(const location &start_location, int count);
+	/**
+	 * Adds given number of move commands to the queue.
+	 *
+	 * @param start_location Initial location.
+	 * @param count Number of tiles to move through.
+	 * @return Target position counted from given information.
+	 */
+	position add_go_straight_commands(const location &start_location, int count);
 
-    /**
-     * Counts number of rotation steps for given initial and desired situation. Adds commands
-     * to the queue if desired.
-     *
-     * @param from Initial direction.
-     * @param to Desired direction.
-     * @param clockwise Desired rotation direction.
-     * @param add_commands Defines if appropriate commands should be added to the queue.
-     * @param rotation_position Position of the rotation.
-     * @return Number of steps to get to desired direction with given requirements.
-     */
-    int try_turn(const direction &from, const direction &to, bool clockwise, bool add_commands,
-                 const position &rotation_position);
+	/**
+	 * Counts number of rotation steps for given initial and desired situation. Adds commands
+	 * to the queue if desired.
+	 *
+	 * @param from Initial direction.
+	 * @param to Desired direction.
+	 * @param clockwise Desired rotation direction.
+	 * @param add_commands Defines if appropriate commands should be added to the queue.
+	 * @param rotation_position Position of the rotation.
+	 * @return Number of steps to get to desired direction with given requirements.
+	 */
+	int try_turn(const direction &from, const direction &to, bool clockwise, bool add_commands,
+		const position &rotation_position);
 
 protected:
 
-    /**
-     * Commands queue.
-     */
-    command **commands;
+	/**
+	 * Commands queue.
+	 */
+	command *commands[1];
 
-    /**
-     * Maximum size of the command queue.
-     */
-    int command_length_estimate;
+	/**
+	 * Maximum size of the command queue.
+	 */
+	int command_length_estimate;
 
-    /**
-     * Current number of stored commands.
-     */
-    int length;
+	/**
+	 * Current number of stored commands.
+	 */
+	int length;
 
-    /**
-     * Index to currently executed command from the queue.
-     */
-    int current_cmd_index;
+	/**
+	 * Index to currently executed command from the queue.
+	 */
+	int current_cmd_index;
 
-    virtual command *get_move_forward_cmd(const location &final_location) = 0;
+	location current_location;
+	location target_location;
+	bool move_first_X;
 
-    virtual command *get_turn_cmd(bool left, const location &final_location) = 0;
+	virtual command *get_move_forward_cmd(const location &final_location) = 0;
 
+	virtual command *get_turn_cmd(bool left, const location &final_location) = 0;
+
+	virtual void prepare_route_step(const location &source, const location &target, bool moveFirstX);
 public:
 
-    virtual ~square_grid_planner();
+	virtual ~square_grid_planner();
 
-    /**
-     * Creates a planner, which is able to make routes on a grid map.
-     */
-    square_grid_planner();
+	/**
+	 * Creates a planner, which is able to make routes on a grid map.
+	 */
+	square_grid_planner();
 
-    /**
-     * Counts the route from given source to target location with specified axis priority.
-     *
-     * @param source Initial location.
-     * @param target Desired target location.
-     * @param moveFirstX Defines axis priority.
-     * @return returns false on failure otherwise true
-     */
-    virtual bool prepare_route(const location &source, const location &target, bool moveFirstX) override;
+	/**
+	 * Counts the route from given source to target location with specified axis priority.
+	 *
+	 * @param source Initial location.
+	 * @param target Desired target location.
+	 * @param moveFirstX Defines axis priority.
+	 * @return returns false on failure otherwise true
+	 */
+	virtual bool prepare_route(const location &source, const location &target, bool moveFirstX) override;
 
-    /**
-     * Gets next command from the queue or nullptr if queue is empty.
-     *
-     * @return The next command from the queue or nullptr if queue is empty.
-     */
-    virtual command *get_next_command() override;
+	/**
+	 * Gets next command from the queue or nullptr if queue is empty.
+	 *
+	 * @return The next command from the queue or nullptr if queue is empty.
+	 */
+	virtual command *get_next_command() override;
 
 };
 
@@ -114,156 +119,155 @@ public:
 
 //class square_grid_planner
 
+inline void square_grid_planner::prepare_route_step(const location& source, const location& target, bool moveFirstX)
+{
+	clear_commands();
+
+	position move = target.get_position() - source.get_position();
+	command_length_estimate = 1; //2 + move.get_manhattan_length() + 1 + 2; // rotation + moves + rotation between moves + final rotation
+
+#ifdef ARDUINO
+	Serial.print("command_length_estimate=");
+	Serial.println(command_length_estimate);
+	Serial.flush();
+#endif
+
+	direction first_move_direction = moveFirstX ? move.get_x_direction() : move.get_y_direction();
+	direction second_move_direction = !moveFirstX ? move.get_x_direction() : move.get_y_direction();
+
+	direction last_direction = source.get_direction();
+	position last_position = source.get_position();
+
+	if (first_move_direction != direction::NotSpecified) {
+		add_rotation_commands(last_position, last_direction, first_move_direction);
+		last_direction = first_move_direction;
+
+		last_position = add_go_straight_commands(location(last_position, last_direction),
+			moveFirstX ? move.get_x_abs() : move.get_y_abs());
+	}
+
+	if (second_move_direction != direction::NotSpecified) {
+		add_rotation_commands(last_position, last_direction, second_move_direction);
+		last_direction = second_move_direction;
+
+		last_position = add_go_straight_commands(location(last_position, last_direction),
+			!moveFirstX ? move.get_x_abs() : move.get_y_abs());
+	}
+
+	if (target.get_direction() != direction::NotSpecified) {
+		add_rotation_commands(last_position, last_direction, target.get_direction());
+	}
+}
+
 inline square_grid_planner::~square_grid_planner() {
-    clear_commands();
+	clear_commands();
 };
 
-inline square_grid_planner::square_grid_planner() : commands(nullptr), command_length_estimate(0), length(0),
-                                                    current_cmd_index(0) {};
+inline square_grid_planner::square_grid_planner() : command_length_estimate(0), length(0),
+current_cmd_index(0), move_first_X(false)
+{};
 
 inline void square_grid_planner::clear_commands() {
-    if (commands != nullptr) {
-        for (size_t i = 0; i < length; i++) {
-            delete commands[i];
-        }
+	for (size_t i = 0; i < length; i++) {
+		if (commands[i] != nullptr)
+			delete commands[i];
+		commands[i] = nullptr;
+	}
 
-        delete[] commands;
-        commands = nullptr;
-    }
-
-
-    length = 0;
-    current_cmd_index = 0;
+	length = 0;
+	current_cmd_index = 0;
 }
 
-inline bool square_grid_planner::add_command(command *command) {
-    if (length >= command_length_estimate) {
+inline bool square_grid_planner::add_command(command *command, const location &result_location) {
+	if (length >= command_length_estimate) {
 #ifdef ARDUINO
-        Serial.println("Error in planner - command buffer exceeded");
+		Serial.println("Error in planner - command buffer exceeded");
 #endif
-        return false;
-    }
+		return false;
+	}
 
-    commands[length++] = command;
+	commands[length++] = command;
+	current_location = result_location;
 
-    return true;
+	return true;
 }
 
-int square_grid_planner::try_turn(const direction &from, const direction &to, bool clockwise, bool add_commands,
-                                  const position &rotation_position) {
-    int steps = 0;
-    direction direction_i = from;
-    while (direction_i != to) {
-        steps++;
-        switch (direction_i) {
-            case direction::North:
-                direction_i = clockwise ? direction::East : direction::West;
-                break;
-            case direction::East:
-                direction_i = clockwise ? direction::South : direction::North;
-                break;
-            case direction::South:
-                direction_i = clockwise ? direction::West : direction::East;
-                break;
-            case direction::West:
-                direction_i = clockwise ? direction::North : direction::South;
-                break;
-            case NotSpecified:
-                return 0;
-        }
+inline int square_grid_planner::try_turn(const direction &from, const direction &to, bool clockwise, bool add_commands,
+	const position &rotation_position) {
+	int steps = 0;
+	direction direction_i = from;
+	while (direction_i != to) {
+		steps++;
+		switch (direction_i) {
+		case direction::North:
+			direction_i = clockwise ? direction::East : direction::West;
+			break;
+		case direction::East:
+			direction_i = clockwise ? direction::South : direction::North;
+			break;
+		case direction::South:
+			direction_i = clockwise ? direction::West : direction::East;
+			break;
+		case direction::West:
+			direction_i = clockwise ? direction::North : direction::South;
+			break;
+		case NotSpecified:
+			return 0;
+		}
 
-        if (add_commands) {
-            if (!add_command(get_turn_cmd(!clockwise, location(rotation_position, direction_i)))) {
-                break;
-            }
-        }
-    }
+		if (add_commands) {
+			location loc(rotation_position, direction_i);
+			if (!add_command(get_turn_cmd(!clockwise, loc), loc)) {
+				break;
+			}
+		}
+	}
 
-    return steps;
+	return steps;
 }
 
-void square_grid_planner::add_rotation_commands(const position &rotation_position, const direction &from,
-                                                const direction &to) {
-    if (from == to || from == direction::NotSpecified || to == direction::NotSpecified) {
-        return;
-    }
+inline void square_grid_planner::add_rotation_commands(const position &rotation_position, const direction &from,
+	const direction &to) {
+	if (from == to || from == direction::NotSpecified || to == direction::NotSpecified) {
+		return;
+	}
 
-    int steps_cw = try_turn(from, to, true, false, rotation_position);
-    int steps_ccw = try_turn(from, to, false, false, rotation_position);
+	int steps_cw = try_turn(from, to, true, false, rotation_position);
+	int steps_ccw = try_turn(from, to, false, false, rotation_position);
 
-    try_turn(from, to, steps_cw < steps_ccw, true, rotation_position);
+	try_turn(from, to, steps_cw < steps_ccw, true, rotation_position);
 };
 
 inline position square_grid_planner::add_go_straight_commands(const location &start_location, int count) {
-    position current_position = start_location.get_position();
-    position move = position(start_location.get_direction());
+	position current_position = start_location.get_position();
+	position move = position(start_location.get_direction());
 
-    for (size_t i = 0; i < count; i++) {
-        current_position += move;
-        if (!add_command(get_move_forward_cmd(location(current_position, start_location.get_direction())))) {
-            break;
-        }
-    }
+	for (size_t i = 0; i < count; i++) {
+		current_position += move;
+		location loc(current_position, start_location.get_direction());
+		if (!add_command(get_move_forward_cmd(loc), loc)) {
+			break;
+		}
+	}
 
-    return current_position;
+	return current_position;
 };
 
 inline bool square_grid_planner::prepare_route(const location &source, const location &target, bool moveFirstX) {
-    clear_commands();
-
-    //TODO: následující kód přesunout jinam
-    if (source.get_direction() == direction::NotSpecified) {
-#ifdef ARDUINO
-        Serial.println("Some of the arguments passed to prepare_route are invalid");
-#endif
-        return false;
-    }
-
-    position move = target.get_position() - source.get_position();
-    command_length_estimate =
-            2 + move.get_manhattan_length() + 1 + 2; // rotation + moves + rotation between moves + final rotation
-    Serial.print("command_length_estimate=");
-    Serial.println(command_length_estimate);
-    Serial.flush();
-    commands = new command *[command_length_estimate];
-
-    direction first_move_direction = moveFirstX ? move.get_x_direction() : move.get_y_direction();
-    direction second_move_direction = !moveFirstX ? move.get_x_direction() : move.get_y_direction();
-
-    direction last_direction = source.get_direction();
-    position last_position = source.get_position();
-
-    if (first_move_direction != direction::NotSpecified) {
-        add_rotation_commands(last_position, last_direction, first_move_direction);
-        last_direction = first_move_direction;
-
-        last_position = add_go_straight_commands(location(last_position, last_direction),
-                                                 moveFirstX ? move.get_x_abs() : move.get_y_abs());
-    }
-
-    if (second_move_direction != direction::NotSpecified) {
-        add_rotation_commands(last_position, last_direction, second_move_direction);
-        last_direction = second_move_direction;
-
-        last_position = add_go_straight_commands(location(last_position, last_direction),
-                                                 !moveFirstX ? move.get_x_abs() : move.get_y_abs());
-    }
-
-    if (target.get_direction() != direction::NotSpecified) {
-        add_rotation_commands(last_position, last_direction, target.get_direction());
-    }
-
-    return true;
+	current_location = source;
+	target_location = target;
+	move_first_X = moveFirstX;
+	return true;
 };
 
 inline command *square_grid_planner::get_next_command() {
-    clear_commands();
-    //TODO: prepare_route na aktuální a target pozici
-    if (commands != nullptr) {
-        return commands[0];
-    } else {
-        return nullptr;
-    }
+	prepare_route_step(current_location, target_location, move_first_X);
+	if (current_cmd_index >= length) {
+		return nullptr;
+	}
+	else {
+		return commands[current_cmd_index++];
+	}
 };
 
 #endif

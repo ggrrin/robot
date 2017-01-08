@@ -1,7 +1,7 @@
 #ifndef location_h_
 #define location_h_
 
-#include <Arduino.h>
+//#include <Arduino.h>
 
 #include "position.hpp"
 
@@ -77,6 +77,15 @@ public:
 
 };
 
+bool operator==(const location& lhs, const location& rhs)
+{
+	return lhs.get_direction() == rhs.get_direction() && lhs.get_position() == rhs.get_position();
+}
+
+bool operator!=(const location& lhs, const location& rhs)
+{
+	return !(lhs == rhs);
+}
 
 
 //class location

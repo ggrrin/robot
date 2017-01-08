@@ -67,7 +67,7 @@ public:
 	{
 	}
 
-	void update(const time_type& time_elapsed) override
+	void update() override
 	{
 		//auto dir = ctx->get_location().get_direction() + (left ? -1 : +1);
 		//dir %= 4;
@@ -83,10 +83,6 @@ public:
 		return done;
 	}
 
-    void set_time_constrain(const time_type& time_constrain) override
-	{
-
-	}
 
 	char* get_name() override
 	{
@@ -109,7 +105,7 @@ public:
 	{ }
 
 
-	void update(const time_type& time_elapsed) override
+	void update() override
 	{
 		//auto pos = ctx->get_location().get_position();
 		//auto dir = ctx->get_location().get_direction();
@@ -147,10 +143,6 @@ public:
 		return done;
 	}
 
-    void set_time_constrain(const time_type& time_constrain) override
-	{
-
-	}
 
 	char* get_name() override
 	{
@@ -167,8 +159,8 @@ protected:
 	command* get_turn_cmd(bool left, const location& final_location) override;
 
 public:
-	test_planner(context* ctx, int width_p, int height_p)
-		: square_grid_planner(width_p, height_p), ctx(ctx)
+	test_planner(context* ctx)
+		: square_grid_planner(), ctx(ctx)
 	{
 	}
 
