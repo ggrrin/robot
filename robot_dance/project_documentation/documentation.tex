@@ -1,0 +1,106 @@
+\documentclass[12pt,a4paper]{report}
+\setlength\textwidth{145mm}
+ \setlength\topmargin{0mm}
+ \setlength\headsep{0mm}
+ \setlength\headheight{0mm}
+ 
+% Přepneme na českou sazbu
+\usepackage[czech]{babel}
+\usepackage[IL2]{fontenc}
+\usepackage{graphicx} 
+
+%% Použité kódování znaků: obvykle latin2, cp1250 nebo utf8:
+\usepackage[utf8]{inputenc}
+
+
+\newcommand{\ccc}[1]{{\mbox{\fontfamily{lmtt}\selectfont\textbf{#1}}}}
+
+\begin{document}
+
+\chapter*{Návrh}
+
+Robot je reprezentovaný třídou \ccc{boe\_bot}, která udržuje kontext a poskytuje
+přístup k senzorům a ovládání robota. K nalplánování trasy robota slouží rozhraní 
+\ccc{planner}. Rozhraní je navrženo tak, aby v případě nutnosti poskytovalo možnost
+různých implmentací plánovačů. Pro plánovač je nejprve nutné vstupní příkazy rozparsovat,
+k tomuto účelu souží rozhraní \ccc{command\_parser}.
+
+\section*{boe\_bot}
+Tato třída reprezentuje stav, poskytuje zjednodušené ovládání robota a odstiňuje od
+hardwaru. Před dlaším používáním je nutno třídu inicializovat zavoláním funkce \ccc{setup}.
+Stavy jednotlivých senzorů lze získat skrze třídu \ccc{sensors}. Tlačítko
+reprezentuje třída \ccc{push\_button}, která posktuje mimojiné funkce pro zjištění, zda je tlačítko
+slačeno či nikoliv. Třída \ccc{wheel\_control} reprezentuje pohon a poskytuje funkce pro
+ovládání rychlosti kol a její vyhlazování. 
+
+\section*{Plánovač}
+Plánovač má za úkol nalézt správnou cestu z počáteční do cílové pozice. Cesta je
+rozdělena na menší části, kde pro každou tuto část vrátí plánovač obsluhu robota 
+reprezentovanou třídou \ccc{command}. Plánovač definuje následující rozhraní:
+\begin{itemize}
+\item  \ccc{prepare\_route} -- nastaví, aby plánovač nalezl vhodnou cestu z výchozí
+do cílové pozice,
+\item \ccc{get\_next\_command} -- vrátí příkaz pro robota řídící robota po část cesty.
+\end{itemize}
+
+Příkaz reprezentovaný třídou \ccc{command} obsahuje svůj vnitřní stav, dle
+kterého probíhá řízení robota. Rozhraní příkazu tvoří následující funkce:
+\begin{itemize} 
+\item \ccc{update} -- v této funkci, která je voláná v každé iteraci smyčky, je možné
+pracovat s robotem,
+\item \ccc{is\_done} -- funkce vrátí, zda je už příkaz dokončen.
+\end{itemize} 
+
+\subsection*{\ccc{square\_grid\_planner}}
+Tato třída implementuje plánovač na čtvercové mřížce, tak jak je požadováno v zadání.
+Plánovač vrací příkazy pro pohyb vpřed a otočení o 90 stupňů. Aby byl plánovač univerzální
+pro různe roboty deklaruje abstraktní funkce pro získání příkazu pro posun a otočení. 
+
+Pro reprezentaci pozice na mřížce slouží třída \ccc{position}, kde souřadnice jsou počítány
+od nuly, tj. A1 je pozice $(0,0)$. Směr robota je určen výčtem \ccc{direction}. 
+Pozici a otočení robota reprezentuje třída \ccc{location}, která se skládá z předchozích
+dvou tříd. Implementaci příkazů pro boe bota poskytuje nádledující plánovač.
+
+\subsection*{\ccc{boe\_bot\_planner}}
+Tato třída dědí z předchozí a poskytuje pouze instance příkazů rodičovské implementaci.
+Pro posun vpřed slouží třída \ccc{move} a pro otočení o $90$ stupňů slouží třída \ccc{turn}.
+Těmto příkazům je předán ukazatel na instanci třídy \ccc{boe\_bot} zkrze kterého mohou 
+ovládat robota.
+
+\subsection*{\ccc{move}}
+Tato třída reprezentuje příkaz, který řídí robota rovně kupředu po čáře od jednoho kříže po následující. 
+Po dosažení následujícího kříže jede robot ještě mírně kupředu tak, aby byl po 
+dokončení příkazu co možná nejpřesněji kolami na kříži. Při detekci kříže je také
+prováděna detekce okraje čtvercového plátna a tuto informaci mouhou využívat další příkazy.
+
+\subsection*{\ccc{turn}}
+Tato třída reprezentuje příkaz, který otočí robotem o $90$ až $180$ stupnů dle aktuální pozice.
+Otáčení je rozděleno do několika částí:
+\begin{itemize}
+\item sjetí z první čáry,
+\item pohyb po bílé ploše,
+\item najetí na druhou čáru.
+\end{itemize}
+
+Takto nastaveným chováním může nastat otočení o $180$ stupňů na okrajích čtvercového pole.
+Plánovač počítá vždy s otočením o $90$ stupňů, tudíž jsou v takovém případě vygenerovány
+dva příkazy otočení. K detekci nadbytečného otoční je použita informace z předchozích
+pohybů popsána v předchozí sekci.
+
+\section*{\ccc{command\_parser\_eeprom}}
+Tato třída slouží k parsování vstupních textových příkazů uložených v paměti eeprom.
+Také se stará o ukládání přikazů příchozích po sériové lince nebo napevno uložených 
+v kódu. K samotnému parsování textu z paměti třída obsahuje konečný automat. 
+S parserem se pak pracuje pomocí následujících funkcí:
+\begin{itemize}
+\item \ccc{fetch\_initial} -- načte počáteční pozici,
+\item \ccc{fetch\_next} -- načte následující příkaz,
+\item \ccc{get\_initial\_location} -- vráti počáteční pozici a směr, 
+\item \ccc{get\_current\_target} -- vráti právě načtenou cílovou pozici příkazu, 
+\item \ccc{is\_first\_directionX} -- vrátí, zda se má robot pohybovat nejprve po ose X pro právě načetný příkaz,
+\item \ccc{get\_finish\_time\_constrain} -- vrátí časový požadavek právě načeného příkazu,
+\item \ccc{reset\_commands} -- vrátí parser do počátečního stavu. 
+\end{itemize}
+
+
+\end{document}
