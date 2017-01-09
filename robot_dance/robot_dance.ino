@@ -29,13 +29,14 @@ void go_home_ISR() {
 }
 
 void loop() {
-//    cmd_parser = new command_parser_mocap();
+    //cmd_parser = new command_parser_mocap();
     cmd_parser = new command_parser_eeprom();
     robot.start(*cmd_parser);
 
     location init_location = cmd_parser->get_initial_location();
     robot.set_location(init_location);
     robot.derive_encounters(init_location);
+	cmd_parser->fetch_next();
 
     pl = new boe_bot_planner(&robot);
 

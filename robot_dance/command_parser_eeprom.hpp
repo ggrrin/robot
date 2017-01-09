@@ -167,6 +167,7 @@ bool command_parser_eeprom::fetch_next() {
 }
 
 location command_parser_eeprom::get_initial_location() {
+	parsed_time_constrain = 0;
     return initial_location;
 }
 

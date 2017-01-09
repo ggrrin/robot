@@ -227,9 +227,9 @@ class command_parser_mocap : public command_parser {
     };
 
     time_type times[size]{
-            0,
-            0,
             100,
+            150,
+            200,
             0,
     };
 
