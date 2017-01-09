@@ -137,7 +137,7 @@ void move_command::do_sensors_correction_on_cross() {
 
 inline void move_command::do_wheels_corrections_on_cross() {
     //NOTE: constant time in ms, which seems to be appropriate
-    if (millis() - cross_encountered_time < 350 ||
+    if (millis() - cross_encountered_time < 375 ||
         robot->get_sensors().left_part() || robot->get_sensors().right_part()) {
         go_straight();
     } else {

@@ -18,8 +18,13 @@ command_parser *cmd_parser = nullptr;
 planner *pl = nullptr;
 
 
+command_parser_eeprom cmep;
+boe_bot_planner  bbp;
+
 void setup() {
     robot.setup();
+    bbp = boe_bot_planner(&robot);
+
 }
 
 void go_home_ISR() {
@@ -28,17 +33,18 @@ void go_home_ISR() {
     robot.get_button().detach_ISR_on_push();
 }
 
+
 void loop() {
     //cmd_parser = new command_parser_mocap();
-    cmd_parser = new command_parser_eeprom();
+	cmd_parser = &cmep;//new command_parser_eeprom();
     robot.start(*cmd_parser);
 
     location init_location = cmd_parser->get_initial_location();
     robot.set_location(init_location);
     robot.derive_encounters(init_location);
-	cmd_parser->fetch_next();
+	//cmd_parser->fetch_next();
 
-    pl = new boe_bot_planner(&robot);
+	pl = &bbp;
 
     time_type start_time = millis();
 
@@ -124,6 +130,6 @@ void loop() {
         robot.stop();
     }
 
-    delete cmd_parser;
-    delete pl;
+    //delete cmd_parser;
+    //delete pl;
 }

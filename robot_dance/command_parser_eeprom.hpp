@@ -151,6 +151,7 @@ bool command_parser_eeprom::fetch_initial() {
 }
 
 bool command_parser_eeprom::fetch_next() {
+	Serial.println("fetch_next()");
     bool _x;
     char next_character;
     is_next_fetched = false;
@@ -159,6 +160,7 @@ bool command_parser_eeprom::fetch_next() {
     bool is_ok;
     do {
         next_character = (char) EEPROM.read(current_address++);
+	Serial.println((char)next_character);
         is_ok = parse_next_character(next_character, &_x);
     } while (current_state != parser_state::NEXT && is_ok);
     ++current_instruction;
@@ -194,6 +196,9 @@ bool command_parser_eeprom::store_character(const char &character) {
     bool is_ok = parse_next_character(character, &write_to_eeprom);
 
     if (write_to_eeprom) {
+		Serial.print("add=");
+		Serial.println(current_address);
+    	Serial.println(character);
         EEPROM.write(current_address++, (uint8_t) character);
         EEPROM.write(current_address + 0, ' ');
         EEPROM.write(current_address + 1, '#');
@@ -238,8 +243,8 @@ void command_parser_eeprom::write_magic() {
 
 bool command_parser_eeprom::parse_next_character(const char &character, bool *write_to_eeprom) {
     char buff[40];
-//    sprintf(buff, "char %0X = '%c', state = %d", character, character, current_state);
-//    Serial.println(buff);
+    sprintf(buff, "char %0X = '%c', state = %d", character, character, current_state);
+    Serial.println(buff);
 
     *write_to_eeprom = true;
     switch (current_state) {

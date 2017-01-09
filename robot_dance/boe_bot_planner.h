@@ -56,6 +56,7 @@ public:
      * @param robot_p Robot to take commands.
      */
     boe_bot_planner(boe_bot *robot_p);
+    boe_bot_planner();
 
 };
 
@@ -65,7 +66,11 @@ public:
 
 inline boe_bot_planner::boe_bot_planner(boe_bot *robot_p) : _move_command(robot_p, location()),
                                                             _turn_command(false, robot_p, location()),
-                                                            square_grid_planner(), robot(robot_p) {};
+                                                            square_grid_planner(), robot(robot_p) {}
+
+inline boe_bot_planner::boe_bot_planner() : _move_command(nullptr, location()),
+_turn_command(false, nullptr, location()),
+square_grid_planner(), robot(nullptr) {};
 
 inline command *boe_bot_planner::get_move_forward_cmd(const location &final_location) {
     _move_command.set(robot, final_location);

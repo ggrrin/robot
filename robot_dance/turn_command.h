@@ -133,9 +133,9 @@ void turn_command::update() {
 
     if (!leavingFirstLine) {
         /* Is robot aligned to next line? */
-        if (!robot->get_sensors().first_left() && !robot->get_sensors().second_left()
+        if (/*!robot->get_sensors().first_left() && */!robot->get_sensors().second_left()
             && robot->get_sensors().middle()
-            && !robot->get_sensors().first_right() && !robot->get_sensors().second_right()) {
+            && !robot->get_sensors().first_right()/* && !robot->get_sensors().second_right()*/) {
             robot->stop();
 
             finish();
