@@ -4,8 +4,6 @@
 
 #include <Arduino.h>
 
-#include "boe_bot.hpp"
-
 #define DEBOUNCE_TIME   (50)
 #define LONG_PRESS_TIME (500)
 

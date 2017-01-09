@@ -2,6 +2,7 @@
 #ifndef COMMAND_PARSER_EEPROM_HPP
 #define COMMAND_PARSER_EEPROM_HPP
 
+#include <Arduino.h>
 #include <EEPROM.h>
 
 #include "planning.h"
@@ -33,17 +34,19 @@ class command_parser_eeprom : public command_parser {
 
     parser_state current_state = FIRST;
 
-    int current_instruction = 0;
+    /**
+     * Current address of the EEPROM.
+     */
     int current_address = 0;
-    String buffer;
 
     int parsed_vertical = 0;
     int parsed_horizontal = 0;
-    direction parsed_direction = direction::NotSpecified;
 
-    time_type parsed_time_constrain = 0;
     bool is_x_preferred = false;
     bool is_next_fetched = false;
+
+    time_type parsed_time_constrain = 0;
+    direction parsed_direction = direction::NotSpecified;
 
     position parsed_position;
     location initial_location;
@@ -51,6 +54,11 @@ class command_parser_eeprom : public command_parser {
 public:
 
     explicit command_parser_eeprom();
+
+    /**
+     * Initializes the parser as constructor would.
+     */
+    void init();
 
     /**
      * Only checks if the EEPROM has not been tinkered with.
@@ -110,11 +118,28 @@ public:
 //class command_parser_eeprom
 
 command_parser_eeprom::command_parser_eeprom() : current_state(FIRST) {
-    Serial.println(F("First few chars from EEPROM:"));
-    for (int i = 0; i < 128; ++i) {
-        Serial.print((char) EEPROM.read(i));
+    init();
+}
+
+#define PRINT_EEPROM_ROWS       (8)
+#define PRINT_EEPROM_COLUMNS    (128)
+
+void command_parser_eeprom::init() {
+    current_state = parser_state::FIRST;
+    bool end_char = false;
+    Serial.println(F("EEPROM content:"));
+    for (int j = 0; j < PRINT_EEPROM_ROWS && !end_char; ++j) {
+        for (int i = 0; i < PRINT_EEPROM_COLUMNS; ++i) {
+            char c = (char) EEPROM.read(j * PRINT_EEPROM_COLUMNS + i);
+            Serial.print(c);
+            if (c == '#') {
+                end_char = true;
+                break;
+            }
+        }
+        Serial.println();
     }
-    Serial.println(F("..."));
+    Serial.println();
 
     if (!check_magic()) {
         Serial.println(F("Magic not found, writing default..."));
@@ -137,10 +162,8 @@ bool command_parser_eeprom::fetch_initial() {
         next_character = (char) EEPROM.read(current_address++);
         is_ok = parse_next_character(next_character, &_x);
     } while (current_state != parser_state::NEXT && is_ok);
-    ++current_instruction;
 
     if (!is_ok) {
-        current_instruction = 0;
         current_address = sizeof(MAGIC);
         current_state = parser_state::FIRST;
         Serial.println(F("Dance empty or invalid! Writing default..."));
@@ -151,7 +174,6 @@ bool command_parser_eeprom::fetch_initial() {
 }
 
 bool command_parser_eeprom::fetch_next() {
-	Serial.println("fetch_next()");
     bool _x;
     char next_character;
     is_next_fetched = false;
@@ -160,10 +182,8 @@ bool command_parser_eeprom::fetch_next() {
     bool is_ok;
     do {
         next_character = (char) EEPROM.read(current_address++);
-	Serial.println((char)next_character);
         is_ok = parse_next_character(next_character, &_x);
     } while (current_state != parser_state::NEXT && is_ok);
-    ++current_instruction;
 
     return is_next_fetched;
 }
@@ -189,17 +209,13 @@ bool command_parser_eeprom::store_character(const char &character) {
     /* Write magic for simple error detection */
     if (current_address == 0) {
         write_magic();
-        buffer = "";
     }
 
     bool write_to_eeprom;
     bool is_ok = parse_next_character(character, &write_to_eeprom);
 
     if (write_to_eeprom) {
-		Serial.print("add=");
-		Serial.println(current_address);
-    	Serial.println(character);
-        EEPROM.write(current_address++, (uint8_t) character);
+        EEPROM.write(current_address++, (byte) character);
         EEPROM.write(current_address + 0, ' ');
         EEPROM.write(current_address + 1, '#');
     }
@@ -209,7 +225,6 @@ bool command_parser_eeprom::store_character(const char &character) {
 
 void command_parser_eeprom::reset_commands() {
     current_address = 0;
-    buffer = "";
     write_magic();
 
     /* Write default dance sequence */
@@ -235,16 +250,16 @@ bool command_parser_eeprom::check_magic() {
 
 void command_parser_eeprom::write_magic() {
     for (; current_address < sizeof(MAGIC) - 1; ++current_address) {
-        EEPROM.write(current_address, (byte) MAGIC[current_address]);
+        EEPROM.write(current_address, (uint8_t) MAGIC[current_address]);
     }
     EEPROM.write(current_address++, ' ');
     EEPROM.write(current_address, '#');
 }
 
 bool command_parser_eeprom::parse_next_character(const char &character, bool *write_to_eeprom) {
-    char buff[40];
-    sprintf(buff, "char %0X = '%c', state = %d", character, character, current_state);
-    Serial.println(buff);
+    char buff[128];
+//    sprintf(buff, "char %0X = '%c', state = %d", character, character, current_state);
+//    Serial.println(buff);
 
     *write_to_eeprom = true;
     switch (current_state) {
@@ -374,11 +389,14 @@ bool command_parser_eeprom::parse_next_character(const char &character, bool *wr
                 current_state = parser_state::TIME;
             } else if (isblank(character)) {
                 *write_to_eeprom = false;
+            } else {
+                return false;
             }
             break;
         case TIME:
             if (isdigit(character)) {
-                parsed_time_constrain = parsed_time_constrain * 10 + (character - '0');
+                parsed_time_constrain *= 10;
+                parsed_time_constrain += character - '0';
             } else if (isblank(character) || character == '\n') {
                 sprintf(buff, "parsed pos=(%d,%d), time=%lu, x_preferred=%d", parsed_position.get_x(),
                         parsed_position.get_y(), parsed_time_constrain, is_x_preferred);

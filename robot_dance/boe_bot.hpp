@@ -4,11 +4,9 @@
 
 #include <Arduino.h>
 
-#include "location.h"
 #include "sensors.hpp"
 #include "wheel_control.hpp"
 #include "planning.h"
-#include "command_parser_eeprom.hpp"
 #include "push_button.hpp"
 
 #define BAUD_SPEED  (115200)
@@ -429,7 +427,7 @@ public:
                 }
             }
 
-            /* blinking LED */
+            /* Blinking LED */
             time_type diff_time = millis() - start_time;
             if (diff_time > 1000) {
                 start_time = millis();

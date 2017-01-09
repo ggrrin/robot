@@ -1,8 +1,6 @@
 #ifndef location_h_
 #define location_h_
 
-//#include <Arduino.h>
-
 #include "position.hpp"
 
 

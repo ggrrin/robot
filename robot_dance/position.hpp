@@ -2,6 +2,8 @@
 #ifndef POSITION_HPP
 #define POSITION_HPP
 
+#include <stdlib.h>
+
 
 /**
  * Provides four basic directions, to which robot can be commanded.
