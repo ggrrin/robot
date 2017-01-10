@@ -17,7 +17,7 @@
 
 \begin{document}
 
-\chapter*{Návrh}
+\chapter*{Dokumentace}
 
 Robot je reprezentovaný třídou \ccc{boe\_bot}, která udržuje kontext a poskytuje
 přístup k senzorům a ovládání robota. K nalplánování trasy robota slouží rozhraní 
@@ -30,7 +30,7 @@ Tato třída reprezentuje stav, poskytuje zjednodušené ovládání robota a od
 hardwaru. Před dlaším používáním je nutno třídu inicializovat zavoláním funkce \ccc{setup}.
 Stavy jednotlivých senzorů lze získat skrze třídu \ccc{sensors}. Tlačítko
 reprezentuje třída \ccc{push\_button}, která posktuje mimojiné funkce pro zjištění, zda je tlačítko
-slačeno či nikoliv. Třída \ccc{wheel\_control} reprezentuje pohon a poskytuje funkce pro
+stlačeno či nikoliv. Třída \ccc{wheel\_control} reprezentuje pohon a poskytuje funkce pro
 ovládání rychlosti kol a její vyhlazování. 
 
 \section*{Plánovač}
@@ -46,7 +46,7 @@ do cílové pozice,
 Příkaz reprezentovaný třídou \ccc{command} obsahuje svůj vnitřní stav, dle
 kterého probíhá řízení robota. Rozhraní příkazu tvoří následující funkce:
 \begin{itemize} 
-\item \ccc{update} -- v této funkci, která je voláná v každé iteraci smyčky, je možné
+\item \ccc{update} -- v této funkci, která musí být volána v každé iteraci smyčky, je možné
 pracovat s robotem,
 \item \ccc{is\_done} -- funkce vrátí, zda je už příkaz dokončen.
 \end{itemize} 
@@ -95,8 +95,8 @@ S parserem se pak pracuje pomocí následujících funkcí:
 \begin{itemize}
 \item \ccc{fetch\_initial} -- načte počáteční pozici,
 \item \ccc{fetch\_next} -- načte následující příkaz,
-\item \ccc{get\_initial\_location} -- vráti počáteční pozici a směr, 
-\item \ccc{get\_current\_target} -- vráti právě načtenou cílovou pozici příkazu, 
+\item \ccc{get\_initial\_location} -- vrátí počáteční pozici a směr, 
+\item \ccc{get\_current\_target} -- vrátí právě načtenou cílovou pozici příkazu, 
 \item \ccc{is\_first\_directionX} -- vrátí, zda se má robot pohybovat nejprve po ose X pro právě načetný příkaz,
 \item \ccc{get\_finish\_time\_constrain} -- vrátí časový požadavek právě načeného příkazu,
 \item \ccc{reset\_commands} -- vrátí parser do počátečního stavu. 
