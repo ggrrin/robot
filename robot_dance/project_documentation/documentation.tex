@@ -11,11 +11,13 @@
 
 %% Použité kódování znaků: obvykle latin2, cp1250 nebo utf8:
 \usepackage[utf8]{inputenc}
-
 % Obsahuje značku stupňů
 \usepackage{gensymb}
+% Balík pro sázení odkazů
+\usepackage{hyperref}
 
 \newcommand{\ccc}[1]{\mbox{\fontfamily{lmtt}\selectfont\textbf{#1}}}
+
 
 \begin{document}
 
@@ -111,5 +113,7 @@ Po spuštění robot vypíše aktuální tanec uložený v~paměti EEPROM a pot�
 
 Další stisknutí robota spustí, v~průběhu tance je možné stisknutím vyvolat návrat do počáteční pozice. Poté, co robot tanec dokončí, nebo se vrátí do počáteční pozice, lze celou proceduru opět znovu opakovat, tj. robot opět čeká na stisk tlačítka a podle délky stisku je možné nahrávat nový tanec, nebo spustit znovu předchozí.
 
+Video demonstrující funkci robota je dostupné na adrese \url{https://youtu.be/6p0oDhGat8A}, hudba a instrukce pro použitý tanec jsou přiloženy v~samostatných souborech.
 
 \end{document}
+
