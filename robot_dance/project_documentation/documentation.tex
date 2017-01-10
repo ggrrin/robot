@@ -12,25 +12,27 @@
 %% Použité kódování znaků: obvykle latin2, cp1250 nebo utf8:
 \usepackage[utf8]{inputenc}
 
+% Obsahuje značku stupňů
+\usepackage{gensymb}
 
-\newcommand{\ccc}[1]{{\mbox{\fontfamily{lmtt}\selectfont\textbf{#1}}}}
+\newcommand{\ccc}[1]{\mbox{\fontfamily{lmtt}\selectfont\textbf{#1}}}
 
 \begin{document}
 
 \chapter*{Dokumentace}
 
 Robot je reprezentovaný třídou \ccc{boe\_bot}, která udržuje kontext a poskytuje
-přístup k senzorům a ovládání robota. K nalplánování trasy robota slouží rozhraní 
+přístup k senzorům a ovládání robota. K naplánování trasy robota slouží rozhraní
 \ccc{planner}. Rozhraní je navrženo tak, aby v případě nutnosti poskytovalo možnost
-různých implmentací plánovačů. Pro plánovač je nejprve nutné vstupní příkazy rozparsovat,
+různých implementací plánovačů. Pro plánovač je nejprve nutné vstupní příkazy rozparsovat,
 k tomuto účelu souží rozhraní \ccc{command\_parser}.
 
 \section*{boe\_bot}
 Tato třída reprezentuje stav, poskytuje zjednodušené ovládání robota a odstiňuje od
-hardwaru. Před dlaším používáním je nutno třídu inicializovat zavoláním funkce \ccc{setup}.
+hardwaru. Před dalším používáním je nutno třídu inicializovat zavoláním funkce \ccc{setup}.
 Stavy jednotlivých senzorů lze získat skrze třídu \ccc{sensors}. Tlačítko
-reprezentuje třída \ccc{push\_button}, která posktuje mimojiné funkce pro zjištění, zda je tlačítko
-stlačeno či nikoliv. Třída \ccc{wheel\_control} reprezentuje pohon a poskytuje funkce pro
+reprezentuje třída \ccc{push\_button}, která poskytuje, mimo jiné, funkce pro zjištění, zda je tlačítko
+stlačeno, či nikoliv. Třída \ccc{wheel\_control} reprezentuje pohon a poskytuje funkce pro
 ovládání rychlosti kol a její vyhlazování. 
 
 \section*{Plánovač}
@@ -40,7 +42,7 @@ reprezentovanou třídou \ccc{command}. Plánovač definuje následující rozhr
 \begin{itemize}
 \item  \ccc{prepare\_route} -- nastaví, aby plánovač nalezl vhodnou cestu z výchozí
 do cílové pozice,
-\item \ccc{get\_next\_command} -- vrátí příkaz pro robota řídící robota po část cesty.
+\item \ccc{get\_next\_command} -- vrátí příkaz, který robota dokáže řídit jeden úsek cesty.
 \end{itemize}
 
 Příkaz reprezentovaný třídou \ccc{command} obsahuje svůj vnitřní stav, dle
@@ -54,12 +56,12 @@ pracovat s robotem,
 \subsection*{\ccc{square\_grid\_planner}}
 Tato třída implementuje plánovač na čtvercové mřížce, tak jak je požadováno v zadání.
 Plánovač vrací příkazy pro pohyb vpřed a otočení o 90 stupňů. Aby byl plánovač univerzální
-pro různe roboty deklaruje abstraktní funkce pro získání příkazu pro posun a otočení. 
+pro různé roboty, deklaruje abstraktní funkce pro získání příkazu pro posun a otočení.
 
 Pro reprezentaci pozice na mřížce slouží třída \ccc{position}, kde souřadnice jsou počítány
 od nuly, tj. A1 je pozice $(0,0)$. Směr robota je určen výčtem \ccc{direction}. 
 Pozici a otočení robota reprezentuje třída \ccc{location}, která se skládá z předchozích
-dvou tříd. Implementaci příkazů pro boe bota poskytuje nádledující plánovač.
+dvou tříd. Implementaci příkazů pro boe bota poskytuje následující plánovač.
 
 \subsection*{\ccc{boe\_bot\_planner}}
 Tato třída dědí z předchozí a poskytuje pouze instance příkazů rodičovské implementaci.
@@ -70,37 +72,44 @@ ovládat robota.
 \subsection*{\ccc{move}}
 Tato třída reprezentuje příkaz, který řídí robota rovně kupředu po čáře od jednoho kříže po následující. 
 Po dosažení následujícího kříže jede robot ještě mírně kupředu tak, aby byl po 
-dokončení příkazu co možná nejpřesněji kolami na kříži. Při detekci kříže je také
-prováděna detekce okraje čtvercového plátna a tuto informaci mouhou využívat další příkazy.
+dokončení příkazu co možná nejpřesněji koly na kříži. Při detekci kříže je také
+prováděna detekce okraje čtvercového plátna a tuto informaci mohou využívat další příkazy.
 
 \subsection*{\ccc{turn}}
-Tato třída reprezentuje příkaz, který otočí robotem o $90$ až $180$ stupnů dle aktuální pozice.
+Tato třída reprezentuje příkaz, který otočí robotem o $90$ až $180$ stupňů dle aktuální pozice.
 Otáčení je rozděleno do několika částí:
 \begin{itemize}
-\item sjetí z první čáry,
-\item pohyb po bílé ploše,
-\item najetí na druhou čáru.
+\item únik z~aktuální čáry,
+\item rotace po bílé ploše,
+\item narotování na další čáru.
 \end{itemize}
 
-Takto nastaveným chováním může nastat otočení o $180$ stupňů na okrajích čtvercového pole.
-Plánovač počítá vždy s otočením o $90$ stupňů, tudíž jsou v takovém případě vygenerovány
-dva příkazy otočení. K detekci nadbytečného otoční je použita informace z předchozích
-pohybů popsána v předchozí sekci.
+Takto nastaveným chováním nastane otočení o~$180\degree$ na okrajích čtvercového pole, pokud je přes vnější část pole naplánována otáčka o~$90\degree$.
+Plánovač počítá vždy s otočením o~$90\degree$, tudíž jsou v takovém případě vygenerovány
+dva příkazy otočení. K detekci nadbytečného otočení je použita informace z předchozích
+pohybů popsaná v předchozí sekci a případná druhá otáčka je proto v~tomto případě efektivně odstraněna.
 
 \section*{\ccc{command\_parser\_eeprom}}
-Tato třída slouží k parsování vstupních textových příkazů uložených v paměti eeprom.
-Také se stará o ukládání přikazů příchozích po sériové lince nebo napevno uložených 
-v kódu. K samotnému parsování textu z paměti třída obsahuje konečný automat. 
+Tato třída slouží k parsování vstupních textových příkazů uložených v paměti EEPROM.
+Také se stará o ukládání příkazů příchozích po sériové lince nebo napevno uloženého
+defautního tance. V~paměti EEPROM je tanec uložen ve stejném formátu jako je definován
+vstup. K samotnému parsování textu z paměti třída obsahuje konečný automat.
 S parserem se pak pracuje pomocí následujících funkcí:
 \begin{itemize}
-\item \ccc{fetch\_initial} -- načte počáteční pozici,
+\item \ccc{fetch\_initial} -- načte počáteční pozici a rotaci,
 \item \ccc{fetch\_next} -- načte následující příkaz,
 \item \ccc{get\_initial\_location} -- vrátí počáteční pozici a směr, 
-\item \ccc{get\_current\_target} -- vrátí právě načtenou cílovou pozici příkazu, 
-\item \ccc{is\_first\_directionX} -- vrátí, zda se má robot pohybovat nejprve po ose X pro právě načetný příkaz,
-\item \ccc{get\_finish\_time\_constrain} -- vrátí časový požadavek právě načeného příkazu,
+\item \ccc{get\_current\_target} -- vrátí právě načtenou cílovou pozici příkazu,
+\item \ccc{is\_first\_directionX} -- vrátí, zda se má robot pohybovat nejprve po horizontální ose X pro právě načtený příkaz,
+\item \ccc{get\_finish\_time\_constrain} -- vrátí časový požadavek právě načteného příkazu,
 \item \ccc{reset\_commands} -- vrátí parser do počátečního stavu. 
 \end{itemize}
+
+
+\section*{Použití}
+Po spuštění robot vypíše aktuální tanec uložený v~paměti EEPROM a poté čeká na první stisk tlačítka. U~tohoto stisku je rozlišováno, zdali se jedná o~krátký, nebo dlouhý stisk. Jako dlouhý je rozpoznán takový stisk, který trvá alespoň $0.5s$. Krátký stisk vyvolá načtení počáteční pozice a robot je připraven k~tanci. Dlouhý stisk přepne robota do stavu ukládání nového tance, takový stav je indikován blikající LED diodou. Sekvence instrukcí tance musí končit bílým znakem, např. mezerou a nahrávání je ukončeno dalším stisknutím tlačítka, kdy je robot, stejně jako po krátkém stisku, připraven k~použití nahraného tance.
+
+Další stisknutí robota spustí, v~průběhu tance je možné stisknutím vyvolat návrat do počáteční pozice. Poté, co robot tanec dokončí, nebo se vrátí do počáteční pozice, lze celou proceduru opět znovu opakovat, tj. robot opět čeká na stisk tlačítka a podle délky stisku je možné nahrávat nový tanec, nebo spustit znovu předchozí.
 
 
 \end{document}
